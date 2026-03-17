@@ -1,0 +1,3290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Enerflo Leaderboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<style>
+/* ── RESET ─────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+
+/* ── VARIABLES ─────────────────────────────────────── */
+:root{
+  --ef-orange:#FF6600;
+  --ef-orange2:#FF8833;
+  --ef-dark:#0B0B1A;
+  --ef-panel:#121224;
+  --ef-panel2:#1A1A30;
+  --ef-border:#FF6600;
+  --ef-dim:#252540;
+  --neon-green:#00FF88;
+  --neon-yellow:#FFD700;
+  --neon-red:#FF4444;
+  --text:#E8E8FF;
+  --text-dim:#5050A0;
+  --text-bright:#FFFFFF;
+  --font-pixel:'Press Start 2P',monospace;
+  --font-mono:'VT323',monospace;
+}
+
+/* ── BASE ──────────────────────────────────────────── */
+html,body{height:100%;background:var(--ef-dark);color:var(--text);font-family:var(--font-mono);font-size:16px;line-height:1.5}
+
+/* Scanline overlay */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(0deg,transparent 0px,transparent 2px,rgba(0,0,0,.08) 2px,rgba(0,0,0,.08) 4px)}
+
+/* ── SCROLLBARS ────────────────────────────────────── */
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:var(--ef-dark)}
+::-webkit-scrollbar-thumb{background:var(--ef-orange)}
+
+/* ── LAYOUT UTILS (flex/grid helpers) ─────────────── */
+.flex{display:flex}.items-center{align-items:center}.items-start{align-items:flex-start}
+.justify-between{justify-content:space-between}.justify-center{justify-content:center}.justify-end{justify-content:flex-end}
+.flex-col{flex-direction:column}.flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}.flex-wrap{flex-wrap:wrap}
+.min-w-0{min-width:0}.w-full{width:100%}.h-full{height:100%}
+.grid{display:grid}.gap-1{gap:4px}.gap-2{gap:8px}.gap-3{gap:12px}.gap-4{gap:16px}.gap-6{gap:24px}
+.grid-cols-1{grid-template-columns:repeat(1,1fr)}.grid-cols-2{grid-template-columns:repeat(2,1fr)}.grid-cols-3{grid-template-columns:repeat(3,1fr)}
+.p-4{padding:16px}.p-6{padding:24px}.px-3{padding-left:12px;padding-right:12px}.px-4{padding-left:16px;padding-right:16px}
+.px-6{padding-left:24px;padding-right:24px}.py-1{padding-top:4px;padding-bottom:4px}.py-2{padding-top:8px;padding-bottom:8px}
+.py-3{padding-top:12px;padding-bottom:12px}.py-4{padding-top:16px;padding-bottom:16px}.py-8{padding-top:32px;padding-bottom:32px}
+.py-10{padding-top:40px;padding-bottom:40px}.mt-1{margin-top:4px}.mt-2{margin-top:8px}.mt-3{margin-top:12px}.mt-4{margin-top:16px}
+.mt-6{margin-top:24px}.mb-1{margin-bottom:4px}.mb-2{margin-bottom:8px}.mb-3{margin-bottom:12px}.mb-4{margin-bottom:16px}
+.mb-5{margin-bottom:20px}.mb-6{margin-bottom:24px}.mb-8{margin-bottom:32px}.ml-2{margin-left:8px}.mr-2{margin-right:8px}
+.pr-4{padding-right:16px}.min-h-screen{min-height:100vh}.overflow-x-auto{overflow-x:auto}.overflow-auto{overflow:auto}
+.text-center{text-align:center}.text-right{text-align:right}.text-left{text-align:left}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.relative{position:relative}.fixed{position:fixed}
+.inset-0{inset:0}.z-30{z-index:30}.z-40{z-index:40}.z-50{z-index:50}.cursor-pointer{cursor:pointer}
+.max-w-md{max-width:28rem}.max-w-lg{max-width:32rem}.max-w-2xl{max-width:42rem}.max-w-7xl{max-width:80rem}
+.mx-auto{margin-left:auto;margin-right:auto}.inline-flex{display:inline-flex}
+@media(min-width:640px){.sm\:flex-row{flex-direction:row}.sm\:items-center{align-items:center}.sm\:col-span-2{grid-column:span 2}.sm\:grid-cols-2{grid-template-columns:repeat(2,1fr)}.sm\:grid-cols-3{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:768px){.md\:px-8{padding-left:32px;padding-right:32px}.md\:w-56{width:224px}.md\:block{display:block}.md\:hidden{display:none}.md\:static{position:static}.md\:ml-0{margin-left:0}.md\:flex{display:flex}}
+@media(min-width:1024px){.lg\:col-span-2{grid-column:span 2}.lg\:col-span-3{grid-column:span 3}.lg\:col-span-5{grid-column:span 5}.lg\:grid-cols-3{grid-template-columns:repeat(3,1fr)}.lg\:grid-cols-5{grid-template-columns:repeat(5,1fr)}}
+
+/* ── ANIMATIONS ────────────────────────────────────── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes glow{0%,100%{text-shadow:0 0 6px var(--ef-orange)}50%{text-shadow:0 0 16px var(--ef-orange),0 0 28px var(--ef-orange)}}
+@keyframes scanMove{from{background-position:0 0}to{background-position:0 100%}}
+@keyframes pixelPulse{0%,100%{box-shadow:3px 3px 0 #CC4400}50%{box-shadow:5px 5px 0 #CC4400,0 0 12px rgba(255,102,0,.4)}}
+.fade-in{animation:fadeIn .18s ease}
+.blink{animation:blink .8s step-end infinite}
+.glow{animation:glow 2.5s ease-in-out infinite}
+
+/* ── PIXEL CARD ────────────────────────────────────── */
+.pixel-card{
+  background:var(--ef-panel);
+  border:3px solid var(--ef-orange);
+  box-shadow:4px 4px 0 rgba(255,102,0,.35);
+  padding:20px;
+  position:relative;
+}
+.pixel-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--ef-orange),transparent 60%)}
+
+/* ── BUTTONS ───────────────────────────────────────── */
+.btn-pixel{
+  font-family:var(--font-pixel);font-size:9px;letter-spacing:.05em;
+  border:3px solid;cursor:pointer;text-transform:uppercase;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  transition:transform .05s,box-shadow .05s;user-select:none;
+  line-height:1.4;
+}
+.btn-pixel:not(.btn-disabled):hover{transform:translate(-1px,-1px)}
+.btn-pixel:not(.btn-disabled):active{transform:translate(1px,1px)}
+.btn-pixel.btn-disabled{opacity:.45;cursor:not-allowed}
+.btn-primary{background:var(--ef-orange);color:#fff;border-color:#CC4400;box-shadow:3px 3px 0 #CC4400}
+.btn-primary:hover{background:var(--ef-orange2);box-shadow:4px 4px 0 #CC4400}
+.btn-primary:active{box-shadow:1px 1px 0 #CC4400}
+.btn-secondary{background:var(--ef-panel2);color:var(--text);border-color:#303060;box-shadow:3px 3px 0 #0A0A18}
+.btn-secondary:hover{border-color:var(--ef-orange)}
+.btn-danger{background:#1A0000;color:var(--neon-red);border-color:#550000;box-shadow:3px 3px 0 #100000}
+.btn-danger:hover{background:#280000}
+.btn-success{background:#001A0D;color:var(--neon-green);border-color:#005533;box-shadow:3px 3px 0 #000F07}
+.btn-ghost{background:transparent;color:var(--text-dim);border-color:var(--ef-dim);box-shadow:none}
+.px-3{padding-left:12px;padding-right:12px}
+.px-4{padding-left:16px;padding-right:16px}
+.px-6{padding-left:24px;padding-right:24px}
+.py-1{padding-top:4px;padding-bottom:4px}
+.py-2{padding-top:8px;padding-bottom:8px}
+.py-3{padding-top:12px;padding-bottom:12px}
+
+/* ── BADGES ────────────────────────────────────────── */
+.badge{font-family:var(--font-pixel);font-size:8px;padding:3px 7px;border:2px solid;
+  display:inline-flex;align-items:center;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap}
+.badge-orange{background:rgba(255,102,0,.12);color:#FF9944;border-color:var(--ef-orange)}
+.badge-green{background:rgba(0,255,136,.08);color:var(--neon-green);border-color:#00CC66}
+.badge-red{background:rgba(255,68,68,.08);color:var(--neon-red);border-color:#CC2222}
+.badge-gray{background:rgba(80,80,160,.1);color:#7070B0;border-color:#303080}
+.badge-yellow{background:rgba(255,215,0,.08);color:var(--neon-yellow);border-color:#CCAA00}
+
+/* ── INPUTS ────────────────────────────────────────── */
+input,select,textarea{
+  background:#07071A;color:var(--text);border:2px solid #252545;
+  padding:8px 12px;width:100%;outline:none;
+  font-family:var(--font-mono);font-size:18px;
+  border-radius:0;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--ef-orange);
+  box-shadow:0 0 0 1px var(--ef-orange),0 0 10px rgba(255,102,0,.25);
+}
+option{background:var(--ef-panel)}
+input[type=date]{color-scheme:dark}
+
+/* ── PIXEL LABEL ───────────────────────────────────── */
+.pixel-label{font-family:var(--font-pixel);font-size:9px;color:var(--text-dim);
+  text-transform:uppercase;letter-spacing:.05em;display:block}
+
+/* ── MODAL ─────────────────────────────────────────── */
+.modal-overlay{background:rgba(0,0,12,.88)}
+.modal-box{background:var(--ef-panel);border:3px solid var(--ef-orange);
+  box-shadow:6px 6px 0 #CC4400,0 0 30px rgba(255,102,0,.2)}
+.modal-header{border-bottom:2px solid var(--ef-orange)}
+.modal-close{font-family:var(--font-pixel);font-size:10px;color:var(--text-dim);letter-spacing:.05em;
+  padding:4px 8px}
+.modal-close:hover{color:var(--neon-red)}
+.pixel-heading{font-family:var(--font-pixel);font-size:11px;color:var(--ef-orange);letter-spacing:.05em}
+
+/* ── DIVIDER ───────────────────────────────────────── */
+.pixel-divider{border:none;border-top:2px solid var(--ef-dim)}
+
+/* ── XP BAR ────────────────────────────────────────── */
+.xp-bar-wrap{background:#07071A;border:2px solid var(--ef-dim);height:12px;position:relative;overflow:hidden}
+.xp-bar-fill{height:100%;background:linear-gradient(90deg,var(--ef-orange),var(--neon-yellow));
+  transition:width .6s cubic-bezier(.4,0,.2,1);position:relative}
+.xp-bar-fill::after{content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.15) 0,rgba(255,255,255,.15) 3px,transparent 3px,transparent 6px)}
+
+/* ── SIDEBAR ───────────────────────────────────────── */
+.sidebar{
+  width:56px;background:#07071A;border-right:3px solid var(--ef-orange);
+  display:flex;flex-direction:column;position:fixed;height:100%;z-index:40;
+  transition:width .2s;
+}
+@media(min-width:768px){.sidebar{position:static;width:220px}}
+.sidebar-open{width:200px}
+.sidebar-logo{
+  padding:14px 12px;border-bottom:2px solid var(--ef-orange);
+  display:flex;align-items:center;gap:10px;min-height:60px;
+}
+.sidebar-logo-icon{font-size:20px;flex-shrink:0}
+.sidebar-logo-text{font-family:var(--font-pixel);font-size:9px;color:var(--ef-orange);
+  display:none;white-space:nowrap;letter-spacing:.08em}
+@media(min-width:768px){.sidebar-logo-text{display:block}}
+.sidebar-mob-btn{color:var(--text-dim);font-size:18px;padding:4px}
+.nav-item{
+  font-family:var(--font-pixel);font-size:9px;letter-spacing:.04em;
+  color:var(--text-dim);background:transparent;border:none;
+  padding:10px 12px;text-transform:uppercase;
+  display:flex;align-items:center;gap:8px;
+  transition:color .1s,background .1s;
+  white-space:nowrap;overflow:hidden;
+}
+.nav-item:hover{color:var(--ef-orange);background:rgba(255,102,0,.06)}
+.nav-item-active{background:var(--ef-orange)!important;color:#fff!important;
+  box-shadow:inset 2px 0 0 rgba(255,255,255,.2)}
+.nav-icon{font-size:14px;flex-shrink:0}
+.nav-text{display:none;overflow:hidden;text-overflow:ellipsis}
+@media(min-width:768px){.nav-text{display:block}}
+.sidebar-footer{padding:12px;border-top:2px solid var(--ef-orange)}
+.sidebar-username{font-family:var(--font-pixel);font-size:8px;color:var(--text);
+  display:none;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(min-width:768px){.sidebar-username{display:block}}
+.logout-btn{font-family:var(--font-pixel);font-size:8px;color:var(--text-dim);
+  letter-spacing:.04em;text-transform:uppercase;padding:4px 0}
+.logout-btn:hover{color:var(--neon-red)}
+.main-content{margin-left:56px}
+@media(min-width:768px){.main-content{margin-left:0}}
+
+/* ── PAGE HEADER ───────────────────────────────────── */
+.page-title{font-family:var(--font-pixel);font-size:16px;color:var(--ef-orange);
+  letter-spacing:.06em;text-shadow:2px 2px 0 #CC4400;line-height:1.6}
+.page-subtitle{font-family:var(--font-mono);font-size:16px;color:var(--text-dim)}
+.section-title{font-family:var(--font-pixel);font-size:11px;color:var(--text);letter-spacing:.05em}
+
+/* ── TABLE ─────────────────────────────────────────── */
+table{border-collapse:collapse;width:100%}
+.table-head th{font-family:var(--font-pixel);font-size:8px;color:var(--text-dim);
+  text-transform:uppercase;letter-spacing:.05em;padding-bottom:12px;border-bottom:2px solid var(--ef-orange)}
+.table-row{border-bottom:2px solid var(--ef-dim)}
+.table-row:hover{background:rgba(255,102,0,.04)}
+.table-cell-name{font-family:var(--font-mono);font-size:18px;color:var(--text-bright);font-weight:600}
+.table-cell-dim{font-family:var(--font-mono);font-size:16px;color:var(--text-dim)}
+.table-cell-desc{font-family:var(--font-mono);font-size:14px;color:var(--text-dim);margin-top:2px}
+
+/* ── LEADERBOARD ───────────────────────────────────── */
+.lb-row{border-bottom:2px solid var(--ef-dim)}
+.lb-row:last-child{border-bottom:none}
+.lb-row-main:hover{background:rgba(255,102,0,.05)}
+.lb-player-name{font-family:var(--font-mono);font-size:20px;color:var(--text-bright);font-weight:700}
+.lb-player-team{font-family:var(--font-pixel);font-size:8px;color:var(--text-dim);margin-top:2px}
+.lb-score{font-family:var(--font-pixel);font-size:18px}
+.lb-expand{background:#07071A;border:2px solid var(--ef-dim);padding:12px 16px;margin:0 0 8px 0}
+.expand-row{border-bottom:1px solid var(--ef-dim)}
+.expand-row:last-child{border-bottom:none}
+.rank-badge{
+  font-family:var(--font-pixel);font-size:8px;letter-spacing:.03em;
+  width:44px;height:32px;display:flex;align-items:center;justify-content:center;
+  border:2px solid;flex-shrink:0;
+}
+.rank-gold{background:linear-gradient(135deg,#3A2000,#8A5A00);color:var(--neon-yellow);border-color:var(--neon-yellow);
+  text-shadow:0 0 8px var(--neon-yellow);box-shadow:0 0 12px rgba(255,215,0,.3)}
+.rank-silver{background:linear-gradient(135deg,#1C1C28,#404060);color:#C0C0D8;border-color:#8080A0}
+.rank-bronze{background:linear-gradient(135deg,#2A1400,#6B3800);color:#CD9060;border-color:#8B5A30}
+.rank-other{background:var(--ef-panel2);color:var(--text-dim);border-color:var(--ef-dim)}
+
+/* ── XP VALUES ─────────────────────────────────────── */
+.xp-value{font-family:var(--font-pixel);font-size:14px;color:var(--neon-yellow)}
+.xp-label{font-family:var(--font-pixel);font-size:9px;color:var(--text-dim)}
+
+/* ── FILTER TOGGLES ────────────────────────────────── */
+.toggle-group{display:inline-flex;border:2px solid var(--ef-orange);overflow:hidden}
+.toggle-btn{font-family:var(--font-pixel);font-size:9px;padding:6px 12px;
+  border:none;transition:background .1s,color .1s;letter-spacing:.04em}
+.toggle-active{background:var(--ef-orange);color:#fff}
+.toggle-inactive{background:var(--ef-panel2);color:var(--text-dim)}
+.toggle-inactive:hover{color:var(--ef-orange)}
+
+/* ── LOGIN ─────────────────────────────────────────── */
+.login-screen{
+  background:var(--ef-dark);
+  background-image:
+    radial-gradient(ellipse at 50% 0%,rgba(255,102,0,.12) 0%,transparent 60%),
+    repeating-linear-gradient(0deg,transparent,transparent 31px,rgba(255,102,0,.04) 31px,rgba(255,102,0,.04) 32px),
+    repeating-linear-gradient(90deg,transparent,transparent 31px,rgba(255,102,0,.04) 31px,rgba(255,102,0,.04) 32px);
+}
+.login-logo-wrap{
+  width:72px;height:72px;background:var(--ef-panel);border:3px solid var(--ef-orange);
+  box-shadow:4px 4px 0 #CC4400,0 0 24px rgba(255,102,0,.4);
+  animation:pixelPulse 2s ease-in-out infinite;
+}
+.login-logo-icon{font-size:32px}
+.login-title{font-family:var(--font-pixel);font-size:22px;color:var(--ef-orange);
+  text-shadow:3px 3px 0 #CC4400,0 0 20px rgba(255,102,0,.5);letter-spacing:.1em;
+  animation:glow 3s ease-in-out infinite}
+.login-subtitle{font-family:var(--font-pixel);font-size:14px;color:var(--text);
+  letter-spacing:.15em;margin-top:6px}
+.login-tagline{font-family:var(--font-pixel);font-size:8px;color:var(--text-dim);letter-spacing:.08em}
+.login-cursor{font-family:var(--font-pixel);font-size:16px;color:var(--ef-orange);height:24px}
+.login-error{font-family:var(--font-pixel);font-size:9px;color:var(--neon-red);
+  text-align:center;padding:8px;border:2px solid var(--neon-red);background:rgba(255,68,68,.08)}
+.demo-btn{background:var(--ef-panel2);border:2px solid var(--ef-dim);padding:8px 12px;
+  width:100%;cursor:pointer;transition:border-color .1s}
+.demo-btn:hover{border-color:var(--ef-orange)}
+.demo-role{font-family:var(--font-pixel);font-size:9px;color:var(--ef-orange)}
+.demo-email{font-family:var(--font-mono);font-size:16px;color:var(--text-dim)}
+.copyright{font-family:var(--font-pixel);font-size:7px;color:var(--ef-dim);letter-spacing:.06em}
+
+/* ── GUILD CARDS ───────────────────────────────────── */
+.guild-name{font-family:var(--font-pixel);font-size:12px;color:var(--ef-orange);letter-spacing:.05em}
+.guild-members{font-family:var(--font-pixel);font-size:8px;color:var(--text-dim)}
+
+/* ── XP ENTRY ──────────────────────────────────────── */
+.xp-entry{background:var(--ef-panel2);border:2px solid var(--ef-dim);padding:10px 12px}
+.xp-entry:hover{border-color:var(--ef-orange)}
+.xp-entry-name{font-family:var(--font-mono);font-size:18px;color:var(--text-bright);font-weight:700}
+.xp-entry-pts{font-family:var(--font-pixel);font-size:11px;color:var(--neon-yellow)}
+.xp-entry-meta{font-family:var(--font-mono);font-size:14px;color:var(--text-dim)}
+
+/* ── MY STATS ──────────────────────────────────────── */
+.stat-num{font-family:var(--font-pixel);font-size:28px;line-height:1.4}
+.history-row{border-bottom:2px solid var(--ef-dim)}
+.history-row:last-child{border-bottom:none}
+.history-dot{width:8px;height:8px;background:var(--ef-orange);flex-shrink:0;margin-top:6px}
+
+/* ── AUDIT ─────────────────────────────────────────── */
+.audit-row{border-bottom:2px solid var(--ef-dim)}
+.audit-row:last-child{border-bottom:none}
+.audit-row:hover{background:rgba(255,102,0,.03)}
+
+/* ── MISC ──────────────────────────────────────────── */
+.opacity-45{opacity:.45}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+"use strict";
+
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+var _excluded = ["children", "onClick", "variant", "size", "disabled", "className"];
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
+function _objectWithoutProperties(e, t) { if (null == e) return {}; var o, r, i = _objectWithoutPropertiesLoose(e, t); if (Object.getOwnPropertySymbols) { var n = Object.getOwnPropertySymbols(e); for (r = 0; r < n.length; r++) o = n[r], -1 === t.indexOf(o) && {}.propertyIsEnumerable.call(e, o) && (i[o] = e[o]); } return i; }
+function _objectWithoutPropertiesLoose(r, e) { if (null == r) return {}; var t = {}; for (var n in r) if ({}.hasOwnProperty.call(r, n)) { if (-1 !== e.indexOf(n)) continue; t[n] = r[n]; } return t; }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+var _React = React,
+  useState = _React.useState,
+  useEffect = _React.useEffect,
+  useContext = _React.useContext,
+  createContext = _React.createContext,
+  useCallback = _React.useCallback,
+  useMemo = _React.useMemo,
+  useRef = _React.useRef;
+
+// ─── CONFIG — PASTE YOUR APPS SCRIPT URL BELOW ───────────────────────────────
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbw9z83fEAytvBWGBvsRNYwWUbgfiMaq4f5xoLc7mer3Pg25O4b80K7sZKBydN5ehrqzLQ/exec';
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+function now() {
+  return new Date().toISOString();
+}
+function fmtDate(iso) {
+  if (!iso) return '';
+  try {
+    return new Date(iso).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  } catch (e) {
+    return iso;
+  }
+}
+function fmtDateTime(iso) {
+  if (!iso) return '';
+  try {
+    return new Date(iso).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  } catch (e) {
+    return iso;
+  }
+}
+
+// ─── SHEETS API ───────────────────────────────────────────────────────────────
+function sheetsLoad() {
+  return _sheetsLoad.apply(this, arguments);
+}
+function _sheetsLoad() {
+  _sheetsLoad = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+    var res, json;
+    return _regenerator().w(function (_context) {
+      while (1) switch (_context.n) {
+        case 0:
+          _context.n = 1;
+          return fetch(SHEETS_URL + '?t=' + Date.now());
+        case 1:
+          res = _context.v;
+          _context.n = 2;
+          return res.json();
+        case 2:
+          json = _context.v;
+          if (json.ok) {
+            _context.n = 3;
+            break;
+          }
+          throw new Error(json.error || 'Load failed');
+        case 3:
+          return _context.a(2, json.data);
+      }
+    }, _callee);
+  }));
+  return _sheetsLoad.apply(this, arguments);
+}
+function sheetsSave(_x, _x2) {
+  return _sheetsSave.apply(this, arguments);
+} // ─── SEED DATA (used only on very first run when Sheets are empty) ────────────
+function _sheetsSave() {
+  _sheetsSave = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(collection, records) {
+    return _regenerator().w(function (_context2) {
+      while (1) switch (_context2.n) {
+        case 0:
+          _context2.n = 1;
+          return fetch(SHEETS_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+              collection: collection,
+              records: records || []
+            })
+          });
+        case 1:
+          return _context2.a(2);
+      }
+    }, _callee2);
+  }));
+  return _sheetsSave.apply(this, arguments);
+}
+function buildSeed() {
+  var m = function m(d) {
+    var dt = new Date();
+    dt.setDate(dt.getDate() - d);
+    return dt.toISOString().split('T')[0];
+  };
+  return {
+    users: [{
+      id: 'u1',
+      email: 'admin@company.com',
+      password: 'admin123',
+      role: 'Admin',
+      name: 'Admin User',
+      personId: ''
+    }, {
+      id: 'u2',
+      email: 'manager@company.com',
+      password: 'manager123',
+      role: 'Manager',
+      name: 'Sam Manager',
+      personId: 'p2'
+    }, {
+      id: 'u3',
+      email: 'emp@company.com',
+      password: 'emp123',
+      role: 'Employee',
+      name: 'Alex Employee',
+      personId: 'p1'
+    }],
+    teams: [{
+      id: 't1',
+      name: 'Sales',
+      createdAt: now()
+    }, {
+      id: 't2',
+      name: 'Engineering',
+      createdAt: now()
+    }, {
+      id: 't3',
+      name: 'Marketing',
+      createdAt: now()
+    }],
+    people: [{
+      id: 'p1',
+      firstName: 'Alex',
+      lastName: 'Johnson',
+      email: 'alex@company.com',
+      teamId: 't1',
+      status: 'Active',
+      createdAt: now()
+    }, {
+      id: 'p2',
+      firstName: 'Sam',
+      lastName: 'Rivera',
+      email: 'sam@company.com',
+      teamId: 't1',
+      status: 'Active',
+      createdAt: now()
+    }, {
+      id: 'p3',
+      firstName: 'Jordan',
+      lastName: 'Lee',
+      email: 'jordan@company.com',
+      teamId: 't2',
+      status: 'Active',
+      createdAt: now()
+    }, {
+      id: 'p4',
+      firstName: 'Morgan',
+      lastName: 'Chen',
+      email: 'morgan@company.com',
+      teamId: 't2',
+      status: 'Active',
+      createdAt: now()
+    }, {
+      id: 'p5',
+      firstName: 'Taylor',
+      lastName: 'Smith',
+      email: 'taylor@company.com',
+      teamId: 't3',
+      status: 'Active',
+      createdAt: now()
+    }],
+    tasks: [{
+      id: 'tk1',
+      name: 'Closed Deal',
+      description: 'Successfully closed a sales deal',
+      pointValue: 100,
+      category: 'Sales',
+      active: true,
+      createdAt: now()
+    }, {
+      id: 'tk2',
+      name: 'Demo Completed',
+      description: 'Completed a product demo',
+      pointValue: 30,
+      category: 'Sales',
+      active: true,
+      createdAt: now()
+    }, {
+      id: 'tk3',
+      name: 'Bug Fixed',
+      description: 'Fixed a reported bug',
+      pointValue: 20,
+      category: 'Engineering',
+      active: true,
+      createdAt: now()
+    }, {
+      id: 'tk4',
+      name: 'Feature Shipped',
+      description: 'Shipped a new feature to production',
+      pointValue: 75,
+      category: 'Engineering',
+      active: true,
+      createdAt: now()
+    }, {
+      id: 'tk5',
+      name: 'Blog Post Published',
+      description: 'Published a marketing blog post',
+      pointValue: 40,
+      category: 'Marketing',
+      active: true,
+      createdAt: now()
+    }, {
+      id: 'tk6',
+      name: 'Training Completed',
+      description: 'Completed a training course',
+      pointValue: 15,
+      category: 'General',
+      active: true,
+      createdAt: now()
+    }],
+    entries: [{
+      id: 'e1',
+      personId: 'p1',
+      taskId: 'tk1',
+      points: 100,
+      date: m(2),
+      notes: 'Big enterprise deal',
+      proofUrl: '',
+      awardedByUserId: 'u1',
+      createdAt: now(),
+      updatedAt: now()
+    }, {
+      id: 'e2',
+      personId: 'p2',
+      taskId: 'tk2',
+      points: 30,
+      date: m(3),
+      notes: '',
+      proofUrl: '',
+      awardedByUserId: 'u1',
+      createdAt: now(),
+      updatedAt: now()
+    }, {
+      id: 'e3',
+      personId: 'p1',
+      taskId: 'tk6',
+      points: 15,
+      date: m(5),
+      notes: '',
+      proofUrl: '',
+      awardedByUserId: 'u2',
+      createdAt: now(),
+      updatedAt: now()
+    }, {
+      id: 'e4',
+      personId: 'p3',
+      taskId: 'tk4',
+      points: 75,
+      date: m(1),
+      notes: 'Auth module',
+      proofUrl: '',
+      awardedByUserId: 'u1',
+      createdAt: now(),
+      updatedAt: now()
+    }, {
+      id: 'e5',
+      personId: 'p4',
+      taskId: 'tk3',
+      points: 20,
+      date: m(4),
+      notes: '',
+      proofUrl: '',
+      awardedByUserId: 'u1',
+      createdAt: now(),
+      updatedAt: now()
+    }, {
+      id: 'e6',
+      personId: 'p5',
+      taskId: 'tk5',
+      points: 40,
+      date: m(2),
+      notes: 'Q1 recap post',
+      proofUrl: '',
+      awardedByUserId: 'u1',
+      createdAt: now(),
+      updatedAt: now()
+    }],
+    audit: []
+  };
+}
+
+// ─── LOADING SCREEN ───────────────────────────────────────────────────────────
+function LoadingScreen(_ref) {
+  var msg = _ref.msg,
+    error = _ref.error,
+    onRetry = _ref.onRetry;
+  var _useState = useState('.'),
+    _useState2 = _slicedToArray(_useState, 2),
+    dots = _useState2[0],
+    setDots = _useState2[1];
+  useEffect(function () {
+    var t = setInterval(function () {
+      return setDots(function (d) {
+        return d.length >= 3 ? '.' : d + '.';
+      });
+    }, 400);
+    return function () {
+      return clearInterval(t);
+    };
+  }, []);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "login-screen min-h-screen flex items-center justify-center"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "text-center fade-in"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "login-logo-wrap inline-flex items-center justify-center mb-6"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "login-logo-icon"
+  }, "\u26A1")), /*#__PURE__*/React.createElement("div", {
+    className: "login-title"
+  }, "ENERFLO"), /*#__PURE__*/React.createElement("div", {
+    className: "login-subtitle mt-1"
+  }, "LEADERBOARD"), !error && /*#__PURE__*/React.createElement("div", {
+    className: "mt-8"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pixel-label",
+    style: {
+      fontSize: '10px',
+      color: 'var(--neon-green)'
+    }
+  }, msg || 'CONNECTING TO DATABANK', dots), /*#__PURE__*/React.createElement("div", {
+    className: "mt-4 xp-bar-wrap mx-auto",
+    style: {
+      width: '200px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "xp-bar-fill",
+    style: {
+      width: '100%',
+      animation: 'loadingBar 1.8s ease-in-out infinite'
+    }
+  }))), error && /*#__PURE__*/React.createElement("div", {
+    className: "mt-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "login-error",
+    style: {
+      maxWidth: '320px',
+      margin: '0 auto'
+    }
+  }, error), /*#__PURE__*/React.createElement("div", {
+    className: "mt-4 pixel-label",
+    style: {
+      fontSize: '9px',
+      color: 'var(--text-dim)'
+    }
+  }, "Make sure SHEETS_URL is set correctly in the HTML file."), /*#__PURE__*/React.createElement("button", {
+    onClick: onRetry,
+    className: "btn-pixel btn-primary px-6 py-2 mt-4 cursor-pointer"
+  }, "RETRY"))), /*#__PURE__*/React.createElement("style", null, "@keyframes loadingBar{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}.xp-bar-wrap{overflow:hidden}"));
+}
+
+// ─── SYNC INDICATOR ───────────────────────────────────────────────────────────
+function SyncBadge(_ref2) {
+  var syncing = _ref2.syncing,
+    error = _ref2.error;
+  if (!syncing && !error) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'fixed',
+      bottom: '16px',
+      right: '16px',
+      zIndex: 9000,
+      fontFamily: 'var(--font-pixel)',
+      fontSize: '8px',
+      padding: '6px 10px',
+      border: '2px solid',
+      background: 'var(--ef-panel)',
+      borderColor: error ? 'var(--neon-red)' : 'var(--neon-green)',
+      color: error ? 'var(--neon-red)' : 'var(--neon-green)',
+      boxShadow: '3px 3px 0 ' + (error ? '#330000' : '#003322')
+    }
+  }, error ? '⚠ SYNC ERR' : /*#__PURE__*/React.createElement("span", null, "\u2191 SYNCING", /*#__PURE__*/React.createElement("span", {
+    className: "blink"
+  }, "\u25AE")));
+}
+
+// ─── CONTEXT ─────────────────────────────────────────────────────────────────
+var AppCtx = createContext(null);
+function useApp() {
+  return useContext(AppCtx);
+}
+function AppProvider(_ref3) {
+  var children = _ref3.children;
+  var _useState3 = useState('loading'),
+    _useState4 = _slicedToArray(_useState3, 2),
+    appState = _useState4[0],
+    setAppState = _useState4[1]; // 'loading'|'ready'|'error'
+  var _useState5 = useState(''),
+    _useState6 = _slicedToArray(_useState5, 2),
+    loadError = _useState6[0],
+    setLoadError = _useState6[1];
+  var _useState7 = useState(false),
+    _useState8 = _slicedToArray(_useState7, 2),
+    syncing = _useState8[0],
+    setSyncing = _useState8[1];
+  var _useState9 = useState(false),
+    _useState0 = _slicedToArray(_useState9, 2),
+    syncError = _useState0[0],
+    setSyncError = _useState0[1];
+  var _useState1 = useState(null),
+    _useState10 = _slicedToArray(_useState1, 2),
+    currentUser = _useState10[0],
+    setCurrentUser = _useState10[1];
+  var _useState11 = useState([]),
+    _useState12 = _slicedToArray(_useState11, 2),
+    people = _useState12[0],
+    setPeopleState = _useState12[1];
+  var _useState13 = useState([]),
+    _useState14 = _slicedToArray(_useState13, 2),
+    teams = _useState14[0],
+    setTeamsState = _useState14[1];
+  var _useState15 = useState([]),
+    _useState16 = _slicedToArray(_useState15, 2),
+    tasks = _useState16[0],
+    setTasksState = _useState16[1];
+  var _useState17 = useState([]),
+    _useState18 = _slicedToArray(_useState17, 2),
+    entries = _useState18[0],
+    setEntriesState = _useState18[1];
+  var _useState19 = useState([]),
+    _useState20 = _slicedToArray(_useState19, 2),
+    users = _useState20[0],
+    setUsersState = _useState20[1];
+  var _useState21 = useState([]),
+    _useState22 = _slicedToArray(_useState21, 2),
+    audit = _useState22[0],
+    setAuditState = _useState22[1];
+
+  // Refs always hold the latest values (needed for functional updaters)
+  var ref = useRef({
+    people: [],
+    teams: [],
+    tasks: [],
+    entries: [],
+    users: [],
+    audit: []
+  });
+  useEffect(function () {
+    ref.current = {
+      people: people,
+      teams: teams,
+      tasks: tasks,
+      entries: entries,
+      users: users,
+      audit: audit
+    };
+  }, [people, teams, tasks, entries, users, audit]);
+
+  // ── background save helper ────────────────────────────────────────────────
+  var bgSave = useCallback(function (collection, data) {
+    setSyncing(true);
+    setSyncError(false);
+    sheetsSave(collection, data).then(function () {
+      return setSyncing(false);
+    })["catch"](function () {
+      setSyncing(false);
+      setSyncError(true);
+      setTimeout(function () {
+        return setSyncError(false);
+      }, 4000);
+    });
+  }, []);
+
+  // ── setter factory ────────────────────────────────────────────────────────
+  var makeSetter = useCallback(function (stateSetter, collection) {
+    return function (val) {
+      var curr = ref.current[collection] || [];
+      var next = typeof val === 'function' ? val(curr) : val;
+      stateSetter(next);
+      ref.current[collection] = next;
+      bgSave(collection, next);
+    };
+  }, [bgSave]);
+  var setPeople = useCallback(makeSetter(setPeopleState, 'people'), [makeSetter]);
+  var setTeams = useCallback(makeSetter(setTeamsState, 'teams'), [makeSetter]);
+  var setTasks = useCallback(makeSetter(setTasksState, 'tasks'), [makeSetter]);
+  var setEntries = useCallback(makeSetter(setEntriesState, 'entries'), [makeSetter]);
+  var setUsers = useCallback(makeSetter(setUsersState, 'users'), [makeSetter]);
+  var setAudit = useCallback(makeSetter(setAuditState, 'audit'), [makeSetter]);
+
+  // ── load on mount ─────────────────────────────────────────────────────────
+  var doLoad = useCallback(function () {
+    setAppState('loading');
+    setLoadError('');
+    if (!SHEETS_URL || SHEETS_URL === 'PASTE_URL_HERE') {
+      setLoadError('SHEETS_URL not configured. Open leaderboard-pro.html and paste your Apps Script URL.');
+      setAppState('error');
+      return;
+    }
+    sheetsLoad().then(function (data) {
+      var isFirstRun = !data.users || data.users.length === 0;
+      if (isFirstRun) {
+        var seed = buildSeed();
+        // Hydrate state
+        setPeopleState(seed.people);
+        setTeamsState(seed.teams);
+        setTasksState(seed.tasks);
+        setEntriesState(seed.entries);
+        setUsersState(seed.users);
+        setAuditState(seed.audit);
+        ref.current = seed;
+        // Persist seed to Sheets
+        return Promise.all(Object.entries(seed).map(function (_ref4) {
+          var _ref5 = _slicedToArray(_ref4, 2),
+            k = _ref5[0],
+            v = _ref5[1];
+          return sheetsSave(k, v);
+        })).then(function () {
+          return setAppState('ready');
+        });
+      }
+      setPeopleState(data.people || []);
+      setTeamsState(data.teams || []);
+      setTasksState(data.tasks || []);
+      setEntriesState(data.entries || []);
+      setUsersState(data.users || []);
+      setAuditState(data.audit || []);
+      ref.current = {
+        people: data.people || [],
+        teams: data.teams || [],
+        tasks: data.tasks || [],
+        entries: data.entries || [],
+        users: data.users || [],
+        audit: data.audit || []
+      };
+      // Restore session
+      try {
+        var s = sessionStorage.getItem('lbs_session');
+        if (s) setCurrentUser(JSON.parse(s));
+      } catch (e) {}
+      setAppState('ready');
+    })["catch"](function (err) {
+      setLoadError(err.message || 'Failed to connect to Google Sheets.');
+      setAppState('error');
+    });
+  }, [makeSetter]);
+  useEffect(function () {
+    doLoad();
+  }, []);
+
+  // ── auth ──────────────────────────────────────────────────────────────────
+  var login = function login(email, password) {
+    var u = (ref.current.users || []).find(function (x) {
+      return x.email.toLowerCase() === email.toLowerCase() && x.password === password;
+    });
+    if (!u) return false;
+    sessionStorage.setItem('lbs_session', JSON.stringify(u));
+    setCurrentUser(u);
+    return true;
+  };
+  var logout = function logout() {
+    sessionStorage.removeItem('lbs_session');
+    setCurrentUser(null);
+  };
+
+  // ── audit helper ──────────────────────────────────────────────────────────
+  var addAudit = useCallback(function (action, entity, entityId, before, after) {
+    if (!currentUser) return;
+    var record = {
+      id: uid(),
+      actor: currentUser.name,
+      actorId: currentUser.id,
+      action: action,
+      entity: entity,
+      entityId: entityId,
+      before: JSON.stringify(before || {}),
+      after: JSON.stringify(after || {}),
+      timestamp: now()
+    };
+    setAudit(function (prev) {
+      return [record].concat(_toConsumableArray(Array.isArray(prev) ? prev : []));
+    });
+  }, [currentUser, setAudit]);
+
+  // ── render ────────────────────────────────────────────────────────────────
+  if (appState === 'loading') return /*#__PURE__*/React.createElement(LoadingScreen, {
+    msg: "LOADING DATA"
+  });
+  if (appState === 'error') return /*#__PURE__*/React.createElement(LoadingScreen, {
+    error: loadError,
+    onRetry: doLoad
+  });
+  return /*#__PURE__*/React.createElement(AppCtx.Provider, {
+    value: {
+      currentUser: currentUser,
+      login: login,
+      logout: logout,
+      people: people,
+      setPeople: setPeople,
+      teams: teams,
+      setTeams: setTeams,
+      tasks: tasks,
+      setTasks: setTasks,
+      entries: entries,
+      setEntries: setEntries,
+      users: users,
+      setUsers: setUsers,
+      audit: audit,
+      setAudit: setAudit,
+      addAudit: addAudit,
+      uid: uid,
+      now: now,
+      fmtDate: fmtDate,
+      fmtDateTime: fmtDateTime
+    }
+  }, children, /*#__PURE__*/React.createElement(SyncBadge, {
+    syncing: syncing,
+    error: syncError
+  }));
+}
+
+// ─── UI COMPONENTS ───────────────────────────────────────────────────────────
+var Btn = function Btn(_ref6) {
+  var children = _ref6.children,
+    onClick = _ref6.onClick,
+    _ref6$variant = _ref6.variant,
+    variant = _ref6$variant === void 0 ? 'primary' : _ref6$variant,
+    _ref6$size = _ref6.size,
+    size = _ref6$size === void 0 ? 'md' : _ref6$size,
+    disabled = _ref6.disabled,
+    _ref6$className = _ref6.className,
+    className = _ref6$className === void 0 ? '' : _ref6$className,
+    p = _objectWithoutProperties(_ref6, _excluded);
+  var sz = {
+    sm: 'px-3 py-1',
+    md: 'px-4 py-2',
+    lg: 'px-6 py-3'
+  }[size] || 'px-4 py-2';
+  var v = {
+    primary: 'btn-primary',
+    secondary: 'btn-secondary',
+    danger: 'btn-danger',
+    success: 'btn-success',
+    orange: 'btn-primary',
+    ghost: 'btn-ghost'
+  }[variant] || 'btn-primary';
+  return /*#__PURE__*/React.createElement("button", _extends({
+    onClick: onClick,
+    disabled: disabled,
+    className: 'btn-pixel ' + sz + ' ' + v + (disabled ? ' btn-disabled' : '') + ' ' + className
+  }, p), children);
+};
+var Card = function Card(_ref7) {
+  var children = _ref7.children,
+    _ref7$className = _ref7.className,
+    className = _ref7$className === void 0 ? '' : _ref7$className;
+  return /*#__PURE__*/React.createElement("div", {
+    className: 'pixel-card ' + className
+  }, children);
+};
+var Badge = function Badge(_ref8) {
+  var children = _ref8.children,
+    _ref8$color = _ref8.color,
+    color = _ref8$color === void 0 ? 'violet' : _ref8$color;
+  var c = {
+    violet: 'badge-orange',
+    orange: 'badge-orange',
+    green: 'badge-green',
+    red: 'badge-red',
+    slate: 'badge-gray',
+    amber: 'badge-yellow'
+  }[color] || 'badge-gray';
+  return /*#__PURE__*/React.createElement("span", {
+    className: 'badge ' + c
+  }, children);
+};
+var Modal = function Modal(_ref9) {
+  var title = _ref9.title,
+    children = _ref9.children,
+    onClose = _ref9.onClose,
+    _ref9$wide = _ref9.wide,
+    wide = _ref9$wide === void 0 ? false : _ref9$wide;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: 'modal-box fade-in w-full ' + (wide ? 'max-w-2xl' : 'max-w-lg')
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal-header flex items-center justify-between px-6 py-4"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "pixel-heading"
+  }, title), /*#__PURE__*/React.createElement("button", {
+    onClick: onClose,
+    className: "modal-close cursor-pointer bg-transparent border-0"
+  }, "[ X ]")), /*#__PURE__*/React.createElement("div", {
+    className: "p-6"
+  }, children)));
+};
+var Field = function Field(_ref0) {
+  var label = _ref0.label,
+    children = _ref0.children,
+    required = _ref0.required;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-2"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "pixel-label"
+  }, label, required && /*#__PURE__*/React.createElement("span", {
+    className: "text-orange-400 ml-1"
+  }, "*")), children);
+};
+var Empty = function Empty(_ref1) {
+  var msg = _ref1.msg;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "text-center py-10",
+    style: {
+      color: '#404060',
+      fontFamily: "'Press Start 2P',monospace",
+      fontSize: '10px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: '8px'
+    }
+  }, "-- ", msg || 'NO DATA', " --"));
+};
+var Divider = function Divider() {
+  return /*#__PURE__*/React.createElement("hr", {
+    className: "pixel-divider my-4"
+  });
+};
+var XPBar = function XPBar(_ref10) {
+  var value = _ref10.value,
+    max = _ref10.max,
+    color = _ref10.color;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "xp-bar-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "xp-bar-fill",
+    style: {
+      width: max > 0 ? Math.min(100, value / max * 100) + '%' : '0%',
+      background: color || undefined
+    }
+  }));
+};
+var PageHeader = function PageHeader(_ref11) {
+  var title = _ref11.title,
+    subtitle = _ref11.subtitle,
+    action = _ref11.action;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h1", {
+    className: "page-title"
+  }, title), subtitle && /*#__PURE__*/React.createElement("p", {
+    className: "page-subtitle mt-2"
+  }, subtitle)), action);
+};
+
+// ─── LOGIN ────────────────────────────────────────────────────────────────────
+function LoginPage() {
+  var _useApp = useApp(),
+    login = _useApp.login;
+  var _useState23 = useState('admin@company.com'),
+    _useState24 = _slicedToArray(_useState23, 2),
+    email = _useState24[0],
+    setEmail = _useState24[1];
+  var _useState25 = useState('admin123'),
+    _useState26 = _slicedToArray(_useState25, 2),
+    pw = _useState26[0],
+    setPw = _useState26[1];
+  var _useState27 = useState(''),
+    _useState28 = _slicedToArray(_useState27, 2),
+    err = _useState28[0],
+    setErr = _useState28[1];
+  var _useState29 = useState(true),
+    _useState30 = _slicedToArray(_useState29, 2),
+    blink = _useState30[0],
+    setBlink = _useState30[1];
+  var demo = [{
+    e: 'admin@company.com',
+    p: 'admin123',
+    role: 'ADMIN'
+  }, {
+    e: 'manager@company.com',
+    p: 'manager123',
+    role: 'MANAGER'
+  }, {
+    e: 'emp@company.com',
+    p: 'emp123',
+    role: 'PLAYER'
+  }];
+  useEffect(function () {
+    var t = setInterval(function () {
+      return setBlink(function (x) {
+        return !x;
+      });
+    }, 600);
+    return function () {
+      return clearInterval(t);
+    };
+  }, []);
+  var handleLogin = function handleLogin(e) {
+    e.preventDefault();
+    if (!login(email, pw)) setErr('>>> ACCESS DENIED <<<');
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "login-screen min-h-screen flex items-center justify-center p-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-full max-w-md fade-in"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "text-center mb-8"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "login-logo-wrap inline-flex items-center justify-center mb-4"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "login-logo-icon"
+  }, "\u26A1")), /*#__PURE__*/React.createElement("div", {
+    className: "login-title"
+  }, "ENERFLO"), /*#__PURE__*/React.createElement("div", {
+    className: "login-subtitle"
+  }, "LEADERBOARD"), /*#__PURE__*/React.createElement("div", {
+    className: "login-tagline mt-3"
+  }, "-- RECOGNITION SYSTEM v1.0 --"), /*#__PURE__*/React.createElement("div", {
+    className: "login-cursor mt-2"
+  }, blink ? '▮' : ' ')), /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement("form", {
+    onSubmit: handleLogin,
+    className: "flex flex-col gap-4"
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "USER ID",
+    required: true
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "email",
+    value: email,
+    onChange: function onChange(e) {
+      return setEmail(e.target.value);
+    },
+    autoFocus: true,
+    placeholder: "enter email..."
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "ACCESS CODE",
+    required: true
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "password",
+    value: pw,
+    onChange: function onChange(e) {
+      return setPw(e.target.value);
+    },
+    placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"
+  })), err && /*#__PURE__*/React.createElement("p", {
+    className: "login-error"
+  }, err), /*#__PURE__*/React.createElement(Btn, {
+    type: "submit",
+    size: "lg",
+    className: "w-full mt-2"
+  }, "\u25B6 INSERT COIN")), /*#__PURE__*/React.createElement(Divider, null), /*#__PURE__*/React.createElement("p", {
+    className: "pixel-label mb-3"
+  }, "SELECT PROFILE"), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-2"
+  }, demo.map(function (d) {
+    return /*#__PURE__*/React.createElement("button", {
+      key: d.role,
+      onClick: function onClick() {
+        setEmail(d.e);
+        setPw(d.p);
+      },
+      className: "demo-btn text-left cursor-pointer"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "demo-role"
+    }, "[", d.role, "]"), /*#__PURE__*/React.createElement("span", {
+      className: "demo-email ml-2"
+    }, d.e));
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "text-center mt-4 copyright"
+  }, "\xA9 ENERFLO CORP. ALL RIGHTS RESERVED")));
+}
+
+// ─── LAYOUT / NAV ─────────────────────────────────────────────────────────────
+var PAGES = {
+  leaderboard: {
+    label: '🏆 HIGH SCORES',
+    roles: ['Admin', 'Manager', 'Employee']
+  },
+  award: {
+    label: '⭐ AWARD XP',
+    roles: ['Admin', 'Manager']
+  },
+  mypoints: {
+    label: '📊 MY STATS',
+    roles: ['Employee', 'Manager']
+  },
+  people: {
+    label: '👥 PLAYERS',
+    roles: ['Admin']
+  },
+  teams: {
+    label: '🏢 GUILDS',
+    roles: ['Admin']
+  },
+  tasks: {
+    label: '✅ QUESTS',
+    roles: ['Admin']
+  },
+  users: {
+    label: '🔐 ACCOUNTS',
+    roles: ['Admin']
+  },
+  audit: {
+    label: '🕵️ AUDIT LOG',
+    roles: ['Admin']
+  }
+};
+function Layout(_ref12) {
+  var page = _ref12.page,
+    setPage = _ref12.setPage,
+    children = _ref12.children;
+  var _useApp2 = useApp(),
+    currentUser = _useApp2.currentUser,
+    logout = _useApp2.logout;
+  var role = currentUser === null || currentUser === void 0 ? void 0 : currentUser.role;
+  var nav = Object.entries(PAGES).filter(function (_ref13) {
+    var _ref14 = _slicedToArray(_ref13, 2),
+      v = _ref14[1];
+    return v.roles.includes(role);
+  });
+  var _useState31 = useState(false),
+    _useState32 = _slicedToArray(_useState31, 2),
+    mob = _useState32[0],
+    setMob = _useState32[1];
+  var roleColor = role === 'Admin' ? 'badge-orange' : role === 'Manager' ? 'badge-yellow' : 'badge-green';
+  return /*#__PURE__*/React.createElement("div", {
+    className: "flex min-h-screen"
+  }, /*#__PURE__*/React.createElement("aside", {
+    className: 'sidebar flex-shrink-0 flex flex-col ' + (mob ? 'sidebar-open' : '')
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sidebar-logo flex items-center gap-3"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "sidebar-logo-icon"
+  }, "\u26A1"), /*#__PURE__*/React.createElement("span", {
+    className: "sidebar-logo-text"
+  }, "ENERFLO LB"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return setMob(function (x) {
+        return !x;
+      });
+    },
+    className: "sidebar-mob-btn ml-auto bg-transparent border-0 cursor-pointer md:hidden"
+  }, "\u2630")), /*#__PURE__*/React.createElement("nav", {
+    className: "flex-1 py-3 px-2 flex flex-col gap-1 overflow-y-auto"
+  }, nav.map(function (_ref15) {
+    var _ref16 = _slicedToArray(_ref15, 2),
+      k = _ref16[0],
+      v = _ref16[1];
+    return /*#__PURE__*/React.createElement("button", {
+      key: k,
+      onClick: function onClick() {
+        setPage(k);
+        setMob(false);
+      },
+      className: 'nav-item w-full text-left px-3 py-2 cursor-pointer border-0 flex items-center gap-2 ' + (page === k ? 'nav-item-active' : '')
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "nav-icon"
+    }, v.label.split(' ')[0]), /*#__PURE__*/React.createElement("span", {
+      className: "nav-text"
+    }, v.label.split(' ').slice(1).join(' ')));
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "sidebar-footer"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "sidebar-username"
+  }, currentUser === null || currentUser === void 0 ? void 0 : currentUser.name), /*#__PURE__*/React.createElement("span", {
+    className: 'badge ' + roleColor
+  }, role), /*#__PURE__*/React.createElement("button", {
+    onClick: logout,
+    className: "logout-btn w-full text-left cursor-pointer bg-transparent border-0 mt-2"
+  }, "[ SIGN OUT ]"))), mob && /*#__PURE__*/React.createElement("div", {
+    className: "fixed inset-0 z-30",
+    onClick: function onClick() {
+      return setMob(false);
+    },
+    style: {
+      background: 'rgba(0,0,0,.7)'
+    }
+  }), /*#__PURE__*/React.createElement("main", {
+    className: "flex-1 min-h-screen overflow-auto main-content"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "max-w-7xl mx-auto px-4 md:px-8 py-8"
+  }, children)));
+}
+
+// ─── PEOPLE PAGE ─────────────────────────────────────────────────────────────
+function PeoplePage() {
+  var _useApp3 = useApp(),
+    people = _useApp3.people,
+    setPeople = _useApp3.setPeople,
+    teams = _useApp3.teams,
+    addAudit = _useApp3.addAudit,
+    uid = _useApp3.uid,
+    now = _useApp3.now;
+  var _useState33 = useState(null),
+    _useState34 = _slicedToArray(_useState33, 2),
+    modal = _useState34[0],
+    setModal = _useState34[1];
+  var _useState35 = useState({}),
+    _useState36 = _slicedToArray(_useState35, 2),
+    form = _useState36[0],
+    setForm = _useState36[1];
+  var _useState37 = useState(''),
+    _useState38 = _slicedToArray(_useState37, 2),
+    search = _useState38[0],
+    setSearch = _useState38[1];
+  var openAdd = function openAdd() {
+    setForm({
+      firstName: '',
+      lastName: '',
+      email: '',
+      teamId: '',
+      status: 'Active'
+    });
+    setModal('add');
+  };
+  var openEdit = function openEdit(p) {
+    setForm(_objectSpread({}, p));
+    setModal('edit');
+  };
+  var saveFn = function saveFn() {
+    if (!form.firstName || !form.lastName || !form.email) {
+      alert('First name, last name, and email are required.');
+      return;
+    }
+    var dup = people.find(function (p) {
+      return p.email.toLowerCase() === form.email.toLowerCase() && p.id !== form.id;
+    });
+    if (dup) {
+      alert('Email must be unique.');
+      return;
+    }
+    if (modal === 'add') {
+      var p = _objectSpread(_objectSpread({}, form), {}, {
+        id: uid(),
+        createdAt: now()
+      });
+      setPeople([].concat(_toConsumableArray(people), [p]));
+      addAudit('CREATE', 'Person', p.id, null, p);
+    } else {
+      var old = people.find(function (p) {
+        return p.id === form.id;
+      });
+      setPeople(people.map(function (p) {
+        return p.id === form.id ? _objectSpread({}, form) : p;
+      }));
+      addAudit('UPDATE', 'Person', form.id, old, form);
+    }
+    setModal(null);
+  };
+  var del = function del(p) {
+    if (!confirm('Deactivate ' + p.firstName + ' ' + p.lastName + '?')) return;
+    var updated = _objectSpread(_objectSpread({}, p), {}, {
+      status: 'Inactive'
+    });
+    setPeople(people.map(function (x) {
+      return x.id === p.id ? updated : x;
+    }));
+    addAudit('DELETE', 'Person', p.id, p, updated);
+  };
+  var filtered = useMemo(function () {
+    return people.filter(function (p) {
+      return (p.firstName + ' ' + p.lastName + ' ' + p.email).toLowerCase().includes(search.toLowerCase());
+    });
+  }, [people, search]);
+  var teamName = function teamName(id) {
+    var _teams$find;
+    return ((_teams$find = teams.find(function (t) {
+      return t.id === id;
+    })) === null || _teams$find === void 0 ? void 0 : _teams$find.name) || '—';
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "fade-in"
+  }, /*#__PURE__*/React.createElement(PageHeader, {
+    title: "\uD83D\uDC65 PLAYERS",
+    subtitle: "Manage company members",
+    action: /*#__PURE__*/React.createElement(Btn, {
+      onClick: openAdd
+    }, "+ ADD PLAYER")
+  }), /*#__PURE__*/React.createElement(Card, {
+    className: "mb-4"
+  }, /*#__PURE__*/React.createElement("input", {
+    placeholder: "Search players...",
+    value: search,
+    onChange: function onChange(e) {
+      return setSearch(e.target.value);
+    }
+  })), /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement("div", {
+    className: "overflow-x-auto"
+  }, /*#__PURE__*/React.createElement("table", {
+    className: "w-full"
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", {
+    className: "table-head"
+  }, /*#__PURE__*/React.createElement("th", {
+    className: "pb-3 pr-4 text-left"
+  }, "NAME"), /*#__PURE__*/React.createElement("th", {
+    className: "pb-3 pr-4 text-left"
+  }, "EMAIL"), /*#__PURE__*/React.createElement("th", {
+    className: "pb-3 pr-4 text-left"
+  }, "GUILD"), /*#__PURE__*/React.createElement("th", {
+    className: "pb-3 pr-4 text-left"
+  }, "STATUS"), /*#__PURE__*/React.createElement("th", {
+    className: "pb-3 text-left"
+  }))), /*#__PURE__*/React.createElement("tbody", null, filtered.length === 0 && /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", {
+    colSpan: 5
+  }, /*#__PURE__*/React.createElement(Empty, {
+    msg: "NO PLAYERS FOUND"
+  }))), filtered.map(function (p) {
+    return /*#__PURE__*/React.createElement("tr", {
+      key: p.id,
+      className: "table-row"
+    }, /*#__PURE__*/React.createElement("td", {
+      className: "py-3 pr-4 table-cell-name"
+    }, p.firstName, " ", p.lastName), /*#__PURE__*/React.createElement("td", {
+      className: "py-3 pr-4 table-cell-dim"
+    }, p.email), /*#__PURE__*/React.createElement("td", {
+      className: "py-3 pr-4"
+    }, /*#__PURE__*/React.createElement(Badge, {
+      color: "violet"
+    }, teamName(p.teamId) || 'NONE')), /*#__PURE__*/React.createElement("td", {
+      className: "py-3 pr-4"
+    }, /*#__PURE__*/React.createElement(Badge, {
+      color: p.status === 'Active' ? 'green' : 'slate'
+    }, p.status === 'Active' ? 'ACTIVE' : 'INACTIVE')), /*#__PURE__*/React.createElement("td", {
+      className: "py-3 flex gap-2"
+    }, /*#__PURE__*/React.createElement(Btn, {
+      size: "sm",
+      variant: "secondary",
+      onClick: function onClick() {
+        return openEdit(p);
+      }
+    }, "EDIT"), /*#__PURE__*/React.createElement(Btn, {
+      size: "sm",
+      variant: "danger",
+      onClick: function onClick() {
+        return del(p);
+      }
+    }, "REMOVE")));
+  }))))), modal && /*#__PURE__*/React.createElement(Modal, {
+    title: modal === 'add' ? '>> ADD PLAYER' : '>> EDIT PLAYER',
+    onClose: function onClose() {
+      return setModal(null);
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-4"
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "First Name",
+    required: true
+  }, /*#__PURE__*/React.createElement("input", {
+    value: form.firstName || '',
+    onChange: function onChange(e) {
+      return setForm(_objectSpread(_objectSpread({}, form), {}, {
+        firstName: e.target.value
+      }));
+    }
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Last Name",
+    required: true
+  }, /*#__PURE__*/React.createElement("input", {
+    value: form.lastName || '',
+    onChange: function onChange(e) {
+      return setForm(_objectSpread(_objectSpread({}, form), {}, {
+        lastName: e.target.value
+      }));
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "mt-4 grid grid-cols-2 gap-4"
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Email",
+    required: true
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "email",
+    value: form.email || '',
+    onChange: function onChange(e) {
+      return setForm(_objectSpread(_objectSpread({}, form), {}, {
+        email: e.target.value
+      }));
+    }
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Guild"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: form.teamId || '',
+    onChange: function onChange(e) {
+      return setForm(_objectSpread(_objectSpread({}, form), {}, {
+        teamId: e.target.value
+      }));
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "-- NO GUILD --"), teams.map(function (t) {
+    return /*#__PURE__*/React.createElement("option", {
+      key: t.id,
+      value: t.id
+    }, t.name);
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: "mt-4"
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Status"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: form.status || 'Active',
+    onChange: function onChange(e) {
+      return setForm(_objectSpread(_objectSpread({}, form), {}, {
+        status: e.target.value
+      }));
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "Active"
+  }, "ACTIVE"), /*#__PURE__*/React.createElement("option", {
+    value: "Inactive"
+  }, "INACTIVE")))), /*#__PURE__*/React.createElement("div", {
+    className: "flex justify-end gap-3 mt-6"
+  }, /*#__PURE__*/React.createElement(Btn, {
+    variant: "secondary",
+    onClick: function onClick() {
+      return setModal(null);
+    }
+  }, "CANCEL"), /*#__PURE__*/React.createElement(Btn, {
+    onClick: saveFn
+  }, "SAVE"))));
+}
+
+// ─── TEAMS PAGE ───────────────────────────────────────────────────────────────
+function TeamsPage() {
+  var _useApp4 = useApp(),
+    teams = _useApp4.teams,
+    setTeams = _useApp4.setTeams,
+    people = _useApp4.people,
+    addAudit = _useApp4.addAudit,
+    uid = _useApp4.uid,
+    now = _useApp4.now;
+  var _useState39 = useState(null),
+    _useState40 = _slicedToArray(_useState39, 2),
+    modal = _useState40[0],
+    setModal = _useState40[1];
+  var _useState41 = useState({
+      name: ''
+    }),
+    _useState42 = _slicedToArray(_useState41, 2),
+    form = _useState42[0],
+    setForm = _useState42[1];
+  var saveFn = function saveFn() {
+    if (!form.name.trim()) {
+      alert('Team name is required.');
+      return;
+    }
+    if (modal === 'add') {
+      var t = {
+        id: uid(),
+        name: form.name.trim(),
+        createdAt: now()
+      };
+      setTeams([].concat(_toConsumableArray(teams), [t]));
+      addAudit('CREATE', 'Team', t.id, null, t);
+    } else {
+      var old = teams.find(function (t) {
+        return t.id === form.id;
+      });
+      setTeams(teams.map(function (t) {
+        return t.id === form.id ? _objectSpread({}, form) : t;
+      }));
+      addAudit('UPDATE', 'Team', form.id, old, form);
+    }
+    setModal(null);
+  };
+  var del = function del(t) {
+    var count = people.filter(function (p) {
+      return p.teamId === t.id;
+    }).length;
+    if (count > 0 && !confirm(count + ' people in "' + t.name + '". Deleting will unassign them. Continue?')) return;
+    setTeams(teams.filter(function (x) {
+      return x.id !== t.id;
+    }));
+    addAudit('DELETE', 'Team', t.id, t, null);
+  };
+  var memberCount = function memberCount(id) {
+    return people.filter(function (p) {
+      return p.teamId === id && p.status === 'Active';
+    }).length;
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "fade-in"
+  }, /*#__PURE__*/React.createElement(PageHeader, {
+    title: "\uD83C\uDFE2 GUILDS",
+    subtitle: "Organize players into teams",
+    action: /*#__PURE__*/React.createElement(Btn, {
+      onClick: function onClick() {
+        setForm({
+          name: ''
+        });
+        setModal('add');
+      }
+    }, "+ CREATE GUILD")
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+  }, teams.length === 0 && /*#__PURE__*/React.createElement(Empty, {
+    msg: "NO GUILDS YET"
+  }), teams.map(function (t) {
+    return /*#__PURE__*/React.createElement(Card, {
+      key: t.id,
+      className: "flex flex-col gap-3"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-start justify-between"
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", {
+      className: "guild-name"
+    }, t.name), /*#__PURE__*/React.createElement("p", {
+      className: "guild-members mt-2"
+    }, memberCount(t.id), " ACTIVE MEMBER", memberCount(t.id) !== 1 ? 'S' : '')), /*#__PURE__*/React.createElement("div", {
+      className: "flex gap-2"
+    }, /*#__PURE__*/React.createElement(Btn, {
+      size: "sm",
+      variant: "secondary",
+      onClick: function onClick() {
+        setForm(_objectSpread({}, t));
+        setModal('edit');
+      }
+    }, "EDIT"), /*#__PURE__*/React.createElement(Btn, {
+      size: "sm",
+      variant: "danger",
+      onClick: function onClick() {
+        return del(t);
+      }
+    }, "DEL"))));
+  })), modal && /*#__PURE__*/React.createElement(Modal, {
+    title: modal === 'add' ? '>> CREATE GUILD' : '>> EDIT GUILD',
+    onClose: function onClose() {
+      return setModal(null);
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Guild Name",
+    required: true
+  }, /*#__PURE__*/React.createElement("input", {
+    value: form.name || '',
+    onChange: function onChange(e) {
+      return setForm(_objectSpread(_objectSpread({}, form), {}, {
+        name: e.target.value
+      }));
+    },
+    autoFocus: true
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "flex justify-end gap-3 mt-6"
+  }, /*#__PURE__*/React.createElement(Btn, {
+    variant: "secondary",
+    onClick: function onClick() {
+      return setModal(null);
+    }
+  }, "CANCEL"), /*#__PURE__*/React.createElement(Btn, {
+    onClick: saveFn
+  }, "SAVE"))));
+}
+
+// ─── TASKS PAGE ───────────────────────────────────────────────────────────────
+function TasksPage() {
+  var _useApp5 = useApp(),
+    tasks = _useApp5.tasks,
+    setTasks = _useApp5.setTasks,
+    addAudit = _useApp5.addAudit,
+    uid = _useApp5.uid,
+    now = _useApp5.now;
+  var _useState43 = useState(null),
+    _useState44 = _slicedToArray(_useState43, 2),
+    modal = _useState44[0],
+    setModal = _useState44[1];
+  var _useState45 = useState({}),
+    _useState46 = _slicedToArray(_useState45, 2),
+    form = _useState46[0],
+    setForm = _useState46[1];
+  var openAdd = function openAdd() {
+    return setForm({
+      name: '',
+      description: '',
+      pointValue: 10,
+      category: '',
+      active: true
+    });
+  };
+  var saveFn = function saveFn() {
+    if (!form.name || !form.pointValue) {
+      alert('Name and point value are required.');
+      return;
+    }
+    if (modal === 'add') {
+      var t = _objectSpread(_objectSpread({}, form), {}, {
+        id: uid(),
+        pointValue: Number(form.pointValue),
+        active: form.active !== false,
+        createdAt: now()
+      });
+      setTasks([].concat(_toConsumableArray(tasks), [t]));
+      addAudit('CREATE', 'Task', t.id, null, t);
+    } else {
+      var old = tasks.find(function (t) {
+        return t.id === form.id;
+      });
+      var updated = _objectSpread(_objectSpread({}, form), {}, {
+        pointValue: Number(form.pointValue)
+      });
+      setTasks(tasks.map(function (t) {
+        return t.id === form.id ? updated : t;
+      }));
+      addAudit('UPDATE', 'Task', form.id, old, updated);
+    }
+    setModal(null);
+  };
+  var toggle = function toggle(t) {
+    var updated = _objectSpread(_objectSpread({}, t), {}, {
+      active: !t.active
+    });
+    setTasks(tasks.map(function (x) {
+      return x.id === t.id ? updated : x;
+    }));
+    addAudit('UPDATE', 'Task', t.id, t, updated);
+  };
+  var cats = _toConsumableArray(new Set(tasks.map(function (t) {
+    return t.category;
+  }).filter(Boolean)));
+  return /*#__PURE__*/React.createElement("div", {
+    className: "fade-in"
+  }, /*#__PURE__*/React.createElement(PageHeader, {
+    title: "\u2705 QUESTS",
+    subtitle: "Define tasks and XP rewards",
+    action: /*#__PURE__*/React.createElement(Btn, {
+      onClick: function onClick() {
+        openAdd();
+        setModal('add');
+      }
+    }, "+ ADD QUEST")
+  }), /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement("div", {
+    className: "overflow-x-auto"
+  }, /*#__PURE__*/React.createElement("table", {
+    className: "w-full"
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", {
+    className: "table-head"
+  }, /*#__PURE__*/React.createElement("th", {
+    className: "pb-3 pr-4 text-left"
+  }, "QUEST"), /*#__PURE__*/React.createElement("th", {
+    className: "pb-3 pr-4 text-left"
+  }, "CATEGORY"), /*#__PURE__*/React.createElement("th", {
+    className: "pb-3 pr-4 text-left"
+  }, "XP"), /*#__PURE__*/React.createElement("th", {
+    className: "pb-3 pr-4 text-left"
+  }, "STATUS"), /*#__PURE__*/React.createElement("th", {
+    className: "pb-3 text-left"
+  }))), /*#__PURE__*/React.createElement("tbody", null, tasks.length === 0 && /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", {
+    colSpan: 5
+  }, /*#__PURE__*/React.createElement(Empty, null))), tasks.map(function (t) {
+    return /*#__PURE__*/React.createElement("tr", {
+      key: t.id,
+      className: "table-row"
+    }, /*#__PURE__*/React.createElement("td", {
+      className: "py-3 pr-4"
+    }, /*#__PURE__*/React.createElement("p", {
+      className: "table-cell-name"
+    }, t.name), t.description && /*#__PURE__*/React.createElement("p", {
+      className: "table-cell-desc"
+    }, t.description)), /*#__PURE__*/React.createElement("td", {
+      className: "py-3 pr-4"
+    }, t.category ? /*#__PURE__*/React.createElement(Badge, {
+      color: "orange"
+    }, t.category) : /*#__PURE__*/React.createElement("span", {
+      className: "table-cell-dim"
+    }, "\u2014")), /*#__PURE__*/React.createElement("td", {
+      className: "py-3 pr-4"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "xp-value"
+    }, "+", t.pointValue), /*#__PURE__*/React.createElement("span", {
+      className: "xp-label"
+    }, " XP")), /*#__PURE__*/React.createElement("td", {
+      className: "py-3 pr-4"
+    }, /*#__PURE__*/React.createElement(Badge, {
+      color: t.active ? 'green' : 'slate'
+    }, t.active ? 'ACTIVE' : 'INACTIVE')), /*#__PURE__*/React.createElement("td", {
+      className: "py-3 flex gap-2"
+    }, /*#__PURE__*/React.createElement(Btn, {
+      size: "sm",
+      variant: "secondary",
+      onClick: function onClick() {
+        setForm(_objectSpread({}, t));
+        setModal('edit');
+      }
+    }, "EDIT"), /*#__PURE__*/React.createElement(Btn, {
+      size: "sm",
+      variant: t.active ? 'danger' : 'success',
+      onClick: function onClick() {
+        return toggle(t);
+      }
+    }, t.active ? 'DISABLE' : 'ENABLE')));
+  }))))), modal && /*#__PURE__*/React.createElement(Modal, {
+    title: modal === 'add' ? '>> ADD QUEST' : '>> EDIT QUEST',
+    onClose: function onClose() {
+      return setModal(null);
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-4"
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Quest Name",
+    required: true
+  }, /*#__PURE__*/React.createElement("input", {
+    value: form.name || '',
+    onChange: function onChange(e) {
+      return setForm(_objectSpread(_objectSpread({}, form), {}, {
+        name: e.target.value
+      }));
+    },
+    autoFocus: true
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Description"
+  }, /*#__PURE__*/React.createElement("textarea", {
+    rows: 2,
+    value: form.description || '',
+    onChange: function onChange(e) {
+      return setForm(_objectSpread(_objectSpread({}, form), {}, {
+        description: e.target.value
+      }));
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-4"
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "XP Value",
+    required: true
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    min: 1,
+    value: form.pointValue || '',
+    onChange: function onChange(e) {
+      return setForm(_objectSpread(_objectSpread({}, form), {}, {
+        pointValue: e.target.value
+      }));
+    }
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Category"
+  }, /*#__PURE__*/React.createElement("input", {
+    list: "cats",
+    value: form.category || '',
+    onChange: function onChange(e) {
+      return setForm(_objectSpread(_objectSpread({}, form), {}, {
+        category: e.target.value
+      }));
+    },
+    placeholder: "e.g. Sales"
+  }), /*#__PURE__*/React.createElement("datalist", {
+    id: "cats"
+  }, cats.map(function (c) {
+    return /*#__PURE__*/React.createElement("option", {
+      key: c,
+      value: c
+    });
+  })))), /*#__PURE__*/React.createElement(Field, {
+    label: "Status"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: form.active ? 'Active' : 'Inactive',
+    onChange: function onChange(e) {
+      return setForm(_objectSpread(_objectSpread({}, form), {}, {
+        active: e.target.value === 'Active'
+      }));
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "Active"
+  }, "ACTIVE"), /*#__PURE__*/React.createElement("option", {
+    value: "Inactive"
+  }, "INACTIVE")))), /*#__PURE__*/React.createElement("div", {
+    className: "flex justify-end gap-3 mt-6"
+  }, /*#__PURE__*/React.createElement(Btn, {
+    variant: "secondary",
+    onClick: function onClick() {
+      return setModal(null);
+    }
+  }, "CANCEL"), /*#__PURE__*/React.createElement(Btn, {
+    onClick: saveFn
+  }, "SAVE"))));
+}
+
+// ─── AWARD POINTS PAGE ───────────────────────────────────────────────────────
+function AwardPointsPage() {
+  var _useApp6 = useApp(),
+    people = _useApp6.people,
+    tasks = _useApp6.tasks,
+    entries = _useApp6.entries,
+    setEntries = _useApp6.setEntries,
+    users = _useApp6.users,
+    currentUser = _useApp6.currentUser,
+    addAudit = _useApp6.addAudit,
+    uid = _useApp6.uid,
+    now = _useApp6.now,
+    fmtDate = _useApp6.fmtDate,
+    teams = _useApp6.teams;
+  var _useState47 = useState({
+      personId: '',
+      taskId: '',
+      points: '',
+      date: new Date().toISOString().split('T')[0],
+      notes: '',
+      proofUrl: ''
+    }),
+    _useState48 = _slicedToArray(_useState47, 2),
+    form = _useState48[0],
+    setForm = _useState48[1];
+  var _useState49 = useState(null),
+    _useState50 = _slicedToArray(_useState49, 2),
+    modal = _useState50[0],
+    setModal = _useState50[1];
+  var _useState51 = useState(null),
+    _useState52 = _slicedToArray(_useState51, 2),
+    editEntry = _useState52[0],
+    setEditEntry = _useState52[1];
+  var _useState53 = useState(''),
+    _useState54 = _slicedToArray(_useState53, 2),
+    search = _useState54[0],
+    setSearch = _useState54[1];
+  var activePeople = useMemo(function () {
+    return people.filter(function (p) {
+      return p.status === 'Active';
+    });
+  }, [people]);
+  var activeTasks = useMemo(function () {
+    return tasks.filter(function (t) {
+      return t.active;
+    });
+  }, [tasks]);
+  var canEdit = (currentUser === null || currentUser === void 0 ? void 0 : currentUser.role) === 'Admin';
+  var handleTaskChange = function handleTaskChange(e) {
+    var tk = tasks.find(function (t) {
+      return t.id === e.target.value;
+    });
+    setForm(function (f) {
+      return _objectSpread(_objectSpread({}, f), {}, {
+        taskId: e.target.value,
+        points: tk ? tk.pointValue : ''
+      });
+    });
+  };
+  var submit = function submit(e) {
+    e.preventDefault();
+    if (!form.personId || !form.taskId || !form.points) {
+      alert('Person, task, and points are required.');
+      return;
+    }
+    var entry = {
+      id: uid(),
+      personId: form.personId,
+      taskId: form.taskId,
+      points: Number(form.points),
+      date: form.date,
+      notes: form.notes,
+      proofUrl: form.proofUrl,
+      awardedByUserId: currentUser.id,
+      createdAt: now(),
+      updatedAt: now()
+    };
+    setEntries([].concat(_toConsumableArray(entries), [entry]));
+    addAudit('CREATE', 'PointEntry', entry.id, null, entry);
+    setForm({
+      personId: '',
+      taskId: '',
+      points: '',
+      date: new Date().toISOString().split('T')[0],
+      notes: '',
+      proofUrl: ''
+    });
+    alert('XP AWARDED! +' + entry.points + ' XP');
+  };
+  var openEdit = function openEdit(en) {
+    setEditEntry(_objectSpread({}, en));
+    setModal('edit');
+  };
+  var saveEdit = function saveEdit() {
+    var old = entries.find(function (e) {
+      return e.id === editEntry.id;
+    });
+    var updated = _objectSpread(_objectSpread({}, editEntry), {}, {
+      points: Number(editEntry.points),
+      updatedAt: now()
+    });
+    setEntries(entries.map(function (e) {
+      return e.id === editEntry.id ? updated : e;
+    }));
+    addAudit('UPDATE', 'PointEntry', editEntry.id, old, updated);
+    setModal(null);
+  };
+  var del = function del(en) {
+    if (!confirm('Delete this XP entry?')) return;
+    setEntries(entries.filter(function (e) {
+      return e.id !== en.id;
+    }));
+    addAudit('DELETE', 'PointEntry', en.id, en, null);
+  };
+  var personName = function personName(id) {
+    var p = people.find(function (x) {
+      return x.id === id;
+    });
+    return p ? p.firstName + ' ' + p.lastName : 'Unknown';
+  };
+  var taskName = function taskName(id) {
+    var _tasks$find;
+    return ((_tasks$find = tasks.find(function (t) {
+      return t.id === id;
+    })) === null || _tasks$find === void 0 ? void 0 : _tasks$find.name) || 'Unknown';
+  };
+  var userName = function userName(id) {
+    var _users$find;
+    return ((_users$find = users.find(function (u) {
+      return u.id === id;
+    })) === null || _users$find === void 0 ? void 0 : _users$find.name) || 'Unknown';
+  };
+  var teamName = function teamName(id) {
+    var _teams$find2;
+    return ((_teams$find2 = teams.find(function (t) {
+      return t.id === id;
+    })) === null || _teams$find2 === void 0 ? void 0 : _teams$find2.name) || '—';
+  };
+  var recent = useMemo(function () {
+    return _toConsumableArray(entries).sort(function (a, b) {
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    }).slice(0, 50);
+  }, [entries]);
+  var filteredRecent = useMemo(function () {
+    return recent.filter(function (e) {
+      var s = search.toLowerCase();
+      return !s || personName(e.personId).toLowerCase().includes(s) || taskName(e.taskId).toLowerCase().includes(s);
+    });
+  }, [recent, search]);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "fade-in"
+  }, /*#__PURE__*/React.createElement(PageHeader, {
+    title: "\u2B50 AWARD XP",
+    subtitle: "Recognize great work"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-1 lg:grid-cols-5 gap-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lg:col-span-2"
+  }, /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement("h2", {
+    className: "section-title mb-5"
+  }, "GRANT XP"), /*#__PURE__*/React.createElement("form", {
+    onSubmit: submit,
+    className: "flex flex-col gap-4"
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Player",
+    required: true
+  }, /*#__PURE__*/React.createElement("select", {
+    value: form.personId,
+    onChange: function onChange(e) {
+      return setForm(_objectSpread(_objectSpread({}, form), {}, {
+        personId: e.target.value
+      }));
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "-- SELECT PLAYER --"), activePeople.map(function (p) {
+    return /*#__PURE__*/React.createElement("option", {
+      key: p.id,
+      value: p.id
+    }, p.firstName, " ", p.lastName, " (", teamName(p.teamId), ")");
+  }))), /*#__PURE__*/React.createElement(Field, {
+    label: "Quest",
+    required: true
+  }, /*#__PURE__*/React.createElement("select", {
+    value: form.taskId,
+    onChange: handleTaskChange
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "-- SELECT QUEST --"), activeTasks.map(function (t) {
+    return /*#__PURE__*/React.createElement("option", {
+      key: t.id,
+      value: t.id
+    }, t.name, " (+", t.pointValue, " XP)");
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-4"
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "XP",
+    required: true
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    min: 1,
+    value: form.points,
+    onChange: function onChange(e) {
+      return setForm(_objectSpread(_objectSpread({}, form), {}, {
+        points: e.target.value
+      }));
+    }
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Date"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "date",
+    value: form.date,
+    onChange: function onChange(e) {
+      return setForm(_objectSpread(_objectSpread({}, form), {}, {
+        date: e.target.value
+      }));
+    }
+  }))), /*#__PURE__*/React.createElement(Field, {
+    label: "Notes / Proof"
+  }, /*#__PURE__*/React.createElement("textarea", {
+    rows: 2,
+    value: form.notes,
+    onChange: function onChange(e) {
+      return setForm(_objectSpread(_objectSpread({}, form), {}, {
+        notes: e.target.value
+      }));
+    },
+    placeholder: "Evidence or context..."
+  })), /*#__PURE__*/React.createElement(Btn, {
+    type: "submit",
+    variant: "primary",
+    size: "lg",
+    className: "w-full"
+  }, "\u2B50 GRANT XP")))), /*#__PURE__*/React.createElement("div", {
+    className: "lg:col-span-3"
+  }, /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between mb-4"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "section-title"
+  }, "XP LOG"), /*#__PURE__*/React.createElement("input", {
+    className: "w-48",
+    placeholder: "Search...",
+    value: search,
+    onChange: function onChange(e) {
+      return setSearch(e.target.value);
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-2",
+    style: {
+      maxHeight: '480px',
+      overflowY: 'auto'
+    }
+  }, filteredRecent.length === 0 && /*#__PURE__*/React.createElement(Empty, {
+    msg: "NO ENTRIES YET"
+  }), filteredRecent.map(function (en) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: en.id,
+      className: "xp-entry flex items-start justify-between gap-3"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex-1 min-w-0"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-2 flex-wrap"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "xp-entry-name"
+    }, personName(en.personId)), /*#__PURE__*/React.createElement("span", {
+      className: "xp-entry-pts"
+    }, "+", en.points, " XP"), /*#__PURE__*/React.createElement(Badge, {
+      color: "orange"
+    }, taskName(en.taskId))), /*#__PURE__*/React.createElement("div", {
+      className: "xp-entry-meta mt-1"
+    }, fmtDate(en.date), " \xB7 by ", userName(en.awardedByUserId), en.notes && /*#__PURE__*/React.createElement("span", null, " \xB7 \"", en.notes, "\""))), canEdit && /*#__PURE__*/React.createElement("div", {
+      className: "flex gap-1 flex-shrink-0"
+    }, /*#__PURE__*/React.createElement(Btn, {
+      size: "sm",
+      variant: "secondary",
+      onClick: function onClick() {
+        return openEdit(en);
+      }
+    }, "EDIT"), /*#__PURE__*/React.createElement(Btn, {
+      size: "sm",
+      variant: "danger",
+      onClick: function onClick() {
+        return del(en);
+      }
+    }, "DEL")));
+  }))))), modal === 'edit' && editEntry && /*#__PURE__*/React.createElement(Modal, {
+    title: ">> EDIT XP ENTRY",
+    onClose: function onClose() {
+      return setModal(null);
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-4"
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Player"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: editEntry.personId,
+    onChange: function onChange(e) {
+      return setEditEntry(_objectSpread(_objectSpread({}, editEntry), {}, {
+        personId: e.target.value
+      }));
+    }
+  }, people.map(function (p) {
+    return /*#__PURE__*/React.createElement("option", {
+      key: p.id,
+      value: p.id
+    }, p.firstName, " ", p.lastName);
+  }))), /*#__PURE__*/React.createElement(Field, {
+    label: "Quest"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: editEntry.taskId,
+    onChange: function onChange(e) {
+      return setEditEntry(_objectSpread(_objectSpread({}, editEntry), {}, {
+        taskId: e.target.value
+      }));
+    }
+  }, tasks.map(function (t) {
+    return /*#__PURE__*/React.createElement("option", {
+      key: t.id,
+      value: t.id
+    }, t.name);
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-4"
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "XP"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    min: 1,
+    value: editEntry.points,
+    onChange: function onChange(e) {
+      return setEditEntry(_objectSpread(_objectSpread({}, editEntry), {}, {
+        points: e.target.value
+      }));
+    }
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Date"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "date",
+    value: editEntry.date,
+    onChange: function onChange(e) {
+      return setEditEntry(_objectSpread(_objectSpread({}, editEntry), {}, {
+        date: e.target.value
+      }));
+    }
+  }))), /*#__PURE__*/React.createElement(Field, {
+    label: "Notes"
+  }, /*#__PURE__*/React.createElement("textarea", {
+    rows: 2,
+    value: editEntry.notes || '',
+    onChange: function onChange(e) {
+      return setEditEntry(_objectSpread(_objectSpread({}, editEntry), {}, {
+        notes: e.target.value
+      }));
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "flex justify-end gap-3 mt-6"
+  }, /*#__PURE__*/React.createElement(Btn, {
+    variant: "secondary",
+    onClick: function onClick() {
+      return setModal(null);
+    }
+  }, "CANCEL"), /*#__PURE__*/React.createElement(Btn, {
+    onClick: saveEdit
+  }, "SAVE"))));
+}
+
+// ─── LEADERBOARD PAGE ─────────────────────────────────────────────────────────
+function LeaderboardPage() {
+  var _useApp7 = useApp(),
+    people = _useApp7.people,
+    teams = _useApp7.teams,
+    tasks = _useApp7.tasks,
+    entries = _useApp7.entries,
+    currentUser = _useApp7.currentUser;
+  var _useState55 = useState('all'),
+    _useState56 = _slicedToArray(_useState55, 2),
+    teamFilter = _useState56[0],
+    setTeamFilter = _useState56[1];
+  var _useState57 = useState('all'),
+    _useState58 = _slicedToArray(_useState57, 2),
+    timePeriod = _useState58[0],
+    setTimePeriod = _useState58[1];
+  var _useState59 = useState(''),
+    _useState60 = _slicedToArray(_useState59, 2),
+    customStart = _useState60[0],
+    setCustomStart = _useState60[1];
+  var _useState61 = useState(''),
+    _useState62 = _slicedToArray(_useState61, 2),
+    customEnd = _useState62[0],
+    setCustomEnd = _useState62[1];
+  var _useState63 = useState('individual'),
+    _useState64 = _slicedToArray(_useState63, 2),
+    view = _useState64[0],
+    setView = _useState64[1];
+  var _useState65 = useState('average'),
+    _useState66 = _slicedToArray(_useState65, 2),
+    teamScoring = _useState66[0],
+    setTeamScoring = _useState66[1];
+  var _useState67 = useState({}),
+    _useState68 = _slicedToArray(_useState67, 2),
+    expanded = _useState68[0],
+    setExpanded = _useState68[1];
+  var _useState69 = useState('none'),
+    _useState70 = _slicedToArray(_useState69, 2),
+    groupBy = _useState70[0],
+    setGroupBy = _useState70[1];
+  var filterEntries = useCallback(function (ents) {
+    if (timePeriod === 'all') return ents;
+    var n = new Date();
+    var start,
+      end = new Date(n);
+    end.setHours(23, 59, 59, 999);
+    if (timePeriod === 'month') {
+      start = new Date(n.getFullYear(), n.getMonth(), 1);
+    } else if (timePeriod === 'quarter') {
+      var q = Math.floor(n.getMonth() / 3);
+      start = new Date(n.getFullYear(), q * 3, 1);
+    } else if (timePeriod === 'week') {
+      start = new Date(n);
+      start.setDate(start.getDate() - start.getDay());
+    } else if (timePeriod === 'custom') {
+      start = customStart ? new Date(customStart) : null;
+      end = customEnd ? new Date(customEnd + 'T23:59:59') : end;
+    }
+    return ents.filter(function (e) {
+      var d = new Date(e.date);
+      if (start && d < start) return false;
+      if (end && d > end) return false;
+      return true;
+    });
+  }, [timePeriod, customStart, customEnd]);
+  var filteredEntries = useMemo(function () {
+    return filterEntries(entries);
+  }, [entries, filterEntries]);
+  var activePeople = useMemo(function () {
+    return people.filter(function (p) {
+      return p.status === 'Active';
+    });
+  }, [people]);
+  var displayPeople = useMemo(function () {
+    return teamFilter === 'all' ? activePeople : activePeople.filter(function (p) {
+      return p.teamId === teamFilter;
+    });
+  }, [activePeople, teamFilter]);
+  var personTotals = useMemo(function () {
+    var totals = {};
+    displayPeople.forEach(function (p) {
+      totals[p.id] = 0;
+    });
+    filteredEntries.forEach(function (e) {
+      if (totals[e.personId] !== undefined) totals[e.personId] += e.points;
+    });
+    return totals;
+  }, [displayPeople, filteredEntries]);
+  var ranked = useMemo(function () {
+    return _toConsumableArray(displayPeople).map(function (p) {
+      return _objectSpread(_objectSpread({}, p), {}, {
+        total: personTotals[p.id] || 0
+      });
+    }).sort(function (a, b) {
+      if (b.total !== a.total) return b.total - a.total;
+      var ae = filteredEntries.filter(function (e) {
+        return e.personId === a.id;
+      }).sort(function (x, y) {
+        return new Date(y.date) - new Date(x.date);
+      })[0];
+      var be = filteredEntries.filter(function (e) {
+        return e.personId === b.id;
+      }).sort(function (x, y) {
+        return new Date(y.date) - new Date(x.date);
+      })[0];
+      if (ae && be) return new Date(be.date) - new Date(ae.date);
+      if (ae) return -1;
+      if (be) return 1;
+      return a.lastName.localeCompare(b.lastName);
+    });
+  }, [displayPeople, personTotals, filteredEntries]);
+  var maxPoints = useMemo(function () {
+    return ranked.length > 0 ? ranked[0].total : 1;
+  }, [ranked]);
+  var teamRanked = useMemo(function () {
+    var tmap = {};
+    teams.forEach(function (t) {
+      tmap[t.id] = _objectSpread(_objectSpread({}, t), {}, {
+        members: [],
+        total: 0
+      });
+    });
+    activePeople.forEach(function (p) {
+      if (tmap[p.teamId]) tmap[p.teamId].members.push(p.id);
+    });
+    filteredEntries.forEach(function (e) {
+      var p = activePeople.find(function (x) {
+        return x.id === e.personId;
+      });
+      if (p && tmap[p.teamId]) tmap[p.teamId].total += e.points;
+    });
+    return Object.values(tmap).map(function (t) {
+      var count = t.members.length || 1;
+      return _objectSpread(_objectSpread({}, t), {}, {
+        avg: t.total / count,
+        score: teamScoring === 'average' ? t.total / count : t.total
+      });
+    }).sort(function (a, b) {
+      return b.score - a.score;
+    });
+  }, [teams, activePeople, filteredEntries, teamScoring]);
+  var personEntries = useCallback(function (pid) {
+    return filteredEntries.filter(function (e) {
+      return e.personId === pid;
+    }).sort(function (a, b) {
+      return new Date(b.date) - new Date(a.date);
+    });
+  }, [filteredEntries]);
+  var taskName = function taskName(id) {
+    var _tasks$find2;
+    return ((_tasks$find2 = tasks.find(function (t) {
+      return t.id === id;
+    })) === null || _tasks$find2 === void 0 ? void 0 : _tasks$find2.name) || '?';
+  };
+  var taskCat = function taskCat(id) {
+    var _tasks$find3;
+    return ((_tasks$find3 = tasks.find(function (t) {
+      return t.id === id;
+    })) === null || _tasks$find3 === void 0 ? void 0 : _tasks$find3.category) || 'Uncategorized';
+  };
+  var teamName = function teamName(id) {
+    var _teams$find3;
+    return ((_teams$find3 = teams.find(function (t) {
+      return t.id === id;
+    })) === null || _teams$find3 === void 0 ? void 0 : _teams$find3.name) || '—';
+  };
+  var toggleExpand = function toggleExpand(id) {
+    return setExpanded(function (ex) {
+      return _objectSpread(_objectSpread({}, ex), {}, _defineProperty({}, id, !ex[id]));
+    });
+  };
+  var exportCSV = function exportCSV() {
+    var rows = ranked.map(function (p, i) {
+      return {
+        Rank: i + 1,
+        Name: p.firstName + ' ' + p.lastName,
+        Team: teamName(p.teamId),
+        TotalXP: p.total
+      };
+    });
+    var csv = rows.map(function (r) {
+      return Object.values(r).join(',');
+    }).join('\n');
+    var b = new Blob([Object.keys(rows[0] || {}).join(',') + '\n' + csv], {
+      type: 'text/csv'
+    });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = 'leaderboard.csv';
+    a.click();
+  };
+  var exportEntriesCSV = function exportEntriesCSV() {
+    var header = 'Person,Task,XP,Date,Notes';
+    var rows = filteredEntries.map(function (e) {
+      var p = people.find(function (x) {
+        return x.id === e.personId;
+      });
+      return [p ? p.firstName + ' ' + p.lastName : '', taskName(e.taskId), e.points, e.date, '"' + (e.notes || '') + '"'].join(',');
+    });
+    var b = new Blob([header + '\n' + rows.join('\n')], {
+      type: 'text/csv'
+    });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = 'xp_entries.csv';
+    a.click();
+  };
+  var rankClass = function rankClass(i) {
+    return i === 0 ? 'rank-gold' : i === 1 ? 'rank-silver' : i === 2 ? 'rank-bronze' : 'rank-other';
+  };
+  var rankLabel = function rankLabel(i) {
+    return i === 0 ? '1ST' : i === 1 ? '2ND' : i === 2 ? '3RD' : i + 1 + 'TH';
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "fade-in"
+  }, /*#__PURE__*/React.createElement(PageHeader, {
+    title: "\uD83C\uDFC6 HIGH SCORES",
+    subtitle: "Current season standings",
+    action: (currentUser === null || currentUser === void 0 ? void 0 : currentUser.role) === 'Admin' && /*#__PURE__*/React.createElement("div", {
+      className: "flex gap-2 flex-wrap"
+    }, /*#__PURE__*/React.createElement(Btn, {
+      variant: "secondary",
+      size: "sm",
+      onClick: exportCSV
+    }, "\u2B07 RANKINGS"), /*#__PURE__*/React.createElement(Btn, {
+      variant: "secondary",
+      size: "sm",
+      onClick: exportEntriesCSV
+    }, "\u2B07 XP LOG"))
+  }), /*#__PURE__*/React.createElement(Card, {
+    className: "mb-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-wrap gap-4 items-end"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "pixel-label mb-2"
+  }, "VIEW"), /*#__PURE__*/React.createElement("div", {
+    className: "toggle-group"
+  }, ['individual', 'team'].map(function (v) {
+    return /*#__PURE__*/React.createElement("button", {
+      key: v,
+      onClick: function onClick() {
+        return setView(v);
+      },
+      className: 'toggle-btn ' + (view === v ? 'toggle-active' : 'toggle-inactive') + ' cursor-pointer border-0'
+    }, v.toUpperCase());
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "pixel-label mb-2"
+  }, "GUILD FILTER"), /*#__PURE__*/React.createElement("select", {
+    value: teamFilter,
+    onChange: function onChange(e) {
+      return setTeamFilter(e.target.value);
+    },
+    style: {
+      width: '160px'
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "all"
+  }, "ALL GUILDS"), teams.map(function (t) {
+    return /*#__PURE__*/React.createElement("option", {
+      key: t.id,
+      value: t.id
+    }, t.name);
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "pixel-label mb-2"
+  }, "TIME PERIOD"), /*#__PURE__*/React.createElement("select", {
+    value: timePeriod,
+    onChange: function onChange(e) {
+      return setTimePeriod(e.target.value);
+    },
+    style: {
+      width: '160px'
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "all"
+  }, "ALL TIME"), /*#__PURE__*/React.createElement("option", {
+    value: "week"
+  }, "THIS WEEK"), /*#__PURE__*/React.createElement("option", {
+    value: "month"
+  }, "THIS MONTH"), /*#__PURE__*/React.createElement("option", {
+    value: "quarter"
+  }, "THIS QUARTER"), /*#__PURE__*/React.createElement("option", {
+    value: "custom"
+  }, "CUSTOM"))), timePeriod === 'custom' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "pixel-label mb-2"
+  }, "FROM"), /*#__PURE__*/React.createElement("input", {
+    type: "date",
+    value: customStart,
+    onChange: function onChange(e) {
+      return setCustomStart(e.target.value);
+    },
+    style: {
+      width: '140px'
+    }
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "pixel-label mb-2"
+  }, "TO"), /*#__PURE__*/React.createElement("input", {
+    type: "date",
+    value: customEnd,
+    onChange: function onChange(e) {
+      return setCustomEnd(e.target.value);
+    },
+    style: {
+      width: '140px'
+    }
+  }))), view === 'individual' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "pixel-label mb-2"
+  }, "GROUP BY"), /*#__PURE__*/React.createElement("select", {
+    value: groupBy,
+    onChange: function onChange(e) {
+      return setGroupBy(e.target.value);
+    },
+    style: {
+      width: '140px'
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "none"
+  }, "NONE"), /*#__PURE__*/React.createElement("option", {
+    value: "task"
+  }, "QUEST"), /*#__PURE__*/React.createElement("option", {
+    value: "category"
+  }, "CATEGORY"))), view === 'team' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "pixel-label mb-2"
+  }, "TEAM SCORE"), /*#__PURE__*/React.createElement("div", {
+    className: "toggle-group"
+  }, ['average', 'total'].map(function (v) {
+    return /*#__PURE__*/React.createElement("button", {
+      key: v,
+      onClick: function onClick() {
+        return setTeamScoring(v);
+      },
+      className: 'toggle-btn ' + (teamScoring === v ? 'toggle-active' : 'toggle-inactive') + ' cursor-pointer border-0'
+    }, v.toUpperCase());
+  }))))), view === 'individual' && /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement("div", {
+    className: "lb-header grid",
+    style: {
+      gridTemplateColumns: '60px 1fr auto 60px',
+      gap: '12px',
+      paddingBottom: '8px',
+      marginBottom: '4px',
+      borderBottom: '2px solid #FF6600'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pixel-label"
+  }, "RANK"), /*#__PURE__*/React.createElement("div", {
+    className: "pixel-label"
+  }, "PLAYER"), /*#__PURE__*/React.createElement("div", {
+    className: "pixel-label"
+  }, "XP BAR"), /*#__PURE__*/React.createElement("div", {
+    className: "pixel-label",
+    style: {
+      textAlign: 'right'
+    }
+  }, "XP")), ranked.length === 0 && /*#__PURE__*/React.createElement(Empty, {
+    msg: "NO PLAYERS"
+  }), ranked.map(function (p, i) {
+    var isExp = expanded[p.id];
+    var ents = personEntries(p.id);
+    var displayEntries = ents;
+    if (groupBy === 'task') {
+      var grouped = {};
+      ents.forEach(function (e) {
+        if (!grouped[e.taskId]) grouped[e.taskId] = {
+          taskId: e.taskId,
+          points: 0,
+          count: 0
+        };
+        grouped[e.taskId].points += e.points;
+        grouped[e.taskId].count++;
+      });
+      displayEntries = Object.values(grouped).sort(function (a, b) {
+        return b.points - a.points;
+      });
+    } else if (groupBy === 'category') {
+      var _grouped = {};
+      ents.forEach(function (e) {
+        var c = taskCat(e.taskId);
+        if (!_grouped[c]) _grouped[c] = {
+          category: c,
+          points: 0,
+          count: 0
+        };
+        _grouped[c].points += e.points;
+        _grouped[c].count++;
+      });
+      displayEntries = Object.values(_grouped).sort(function (a, b) {
+        return b.points - a.points;
+      });
+    }
+    return /*#__PURE__*/React.createElement("div", {
+      key: p.id,
+      className: "lb-row"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "lb-row-main grid items-center cursor-pointer",
+      style: {
+        gridTemplateColumns: '60px 1fr auto 60px',
+        gap: '12px',
+        padding: '10px 4px'
+      },
+      onClick: function onClick() {
+        return toggleExpand(p.id);
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: 'rank-badge ' + rankClass(i)
+    }, rankLabel(i)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "lb-player-name"
+    }, p.firstName, " ", p.lastName), /*#__PURE__*/React.createElement("div", {
+      className: "lb-player-team"
+    }, teamName(p.teamId))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: '120px'
+      }
+    }, /*#__PURE__*/React.createElement(XPBar, {
+      value: p.total,
+      max: maxPoints
+    })), /*#__PURE__*/React.createElement("div", {
+      className: 'lb-score ' + rankClass(i),
+      style: {
+        textAlign: 'right'
+      }
+    }, p.total.toLocaleString())), isExp && /*#__PURE__*/React.createElement("div", {
+      className: "lb-expand fade-in"
+    }, ents.length === 0 ? /*#__PURE__*/React.createElement("p", {
+      className: "pixel-label",
+      style: {
+        padding: '12px 8px'
+      }
+    }, "NO XP IN THIS PERIOD") : groupBy === 'none' ? /*#__PURE__*/React.createElement("table", {
+      className: "w-full"
+    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
+      className: "text-left pb-2 pr-4"
+    }, "DATE"), /*#__PURE__*/React.createElement("th", {
+      className: "text-left pb-2 pr-4"
+    }, "QUEST"), /*#__PURE__*/React.createElement("th", {
+      className: "text-left pb-2 pr-4"
+    }, "XP"), /*#__PURE__*/React.createElement("th", {
+      className: "text-left pb-2"
+    }, "NOTES"))), /*#__PURE__*/React.createElement("tbody", null, ents.map(function (e) {
+      return /*#__PURE__*/React.createElement("tr", {
+        key: e.id,
+        className: "expand-row"
+      }, /*#__PURE__*/React.createElement("td", {
+        className: "py-1 pr-4 table-cell-dim"
+      }, e.date), /*#__PURE__*/React.createElement("td", {
+        className: "py-1 pr-4 table-cell-name"
+      }, taskName(e.taskId)), /*#__PURE__*/React.createElement("td", {
+        className: "py-1 pr-4 xp-value"
+      }, "+", e.points), /*#__PURE__*/React.createElement("td", {
+        className: "py-1 table-cell-dim"
+      }, e.notes || '—'));
+    }))) : groupBy === 'task' ? /*#__PURE__*/React.createElement("table", {
+      className: "w-full"
+    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
+      className: "text-left pb-2 pr-4"
+    }, "QUEST"), /*#__PURE__*/React.createElement("th", {
+      className: "text-left pb-2 pr-4"
+    }, "TOTAL XP"), /*#__PURE__*/React.createElement("th", {
+      className: "text-left pb-2"
+    }, "COUNT"))), /*#__PURE__*/React.createElement("tbody", null, displayEntries.map(function (e) {
+      return /*#__PURE__*/React.createElement("tr", {
+        key: e.taskId,
+        className: "expand-row"
+      }, /*#__PURE__*/React.createElement("td", {
+        className: "py-1 pr-4 table-cell-name"
+      }, taskName(e.taskId)), /*#__PURE__*/React.createElement("td", {
+        className: "py-1 pr-4 xp-value"
+      }, e.points), /*#__PURE__*/React.createElement("td", {
+        className: "py-1 table-cell-dim"
+      }, "x", e.count));
+    }))) : /*#__PURE__*/React.createElement("table", {
+      className: "w-full"
+    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
+      className: "text-left pb-2 pr-4"
+    }, "CATEGORY"), /*#__PURE__*/React.createElement("th", {
+      className: "text-left pb-2 pr-4"
+    }, "TOTAL XP"), /*#__PURE__*/React.createElement("th", {
+      className: "text-left pb-2"
+    }, "ENTRIES"))), /*#__PURE__*/React.createElement("tbody", null, displayEntries.map(function (e) {
+      return /*#__PURE__*/React.createElement("tr", {
+        key: e.category,
+        className: "expand-row"
+      }, /*#__PURE__*/React.createElement("td", {
+        className: "py-1 pr-4 table-cell-name"
+      }, e.category), /*#__PURE__*/React.createElement("td", {
+        className: "py-1 pr-4 xp-value"
+      }, e.points), /*#__PURE__*/React.createElement("td", {
+        className: "py-1 table-cell-dim"
+      }, "x", e.count));
+    })))));
+  })), view === 'team' && /*#__PURE__*/React.createElement(Card, null, teamRanked.map(function (t, i) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: t.id,
+      className: "lb-row"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "lb-row-main grid items-center",
+      style: {
+        gridTemplateColumns: '60px 1fr auto 80px',
+        gap: '12px',
+        padding: '12px 4px'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: 'rank-badge ' + rankClass(i)
+    }, rankLabel(i)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "lb-player-name"
+    }, t.name), /*#__PURE__*/React.createElement("div", {
+      className: "lb-player-team"
+    }, t.members.length, " MEMBER", t.members.length !== 1 ? 'S' : '')), /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: '120px'
+      }
+    }, /*#__PURE__*/React.createElement(XPBar, {
+      value: teamScoring === 'average' ? t.avg : t.total,
+      max: teamRanked.length > 0 ? teamScoring === 'average' ? teamRanked[0].avg : teamRanked[0].total : 1
+    })), /*#__PURE__*/React.createElement("div", {
+      className: 'lb-score ' + rankClass(i),
+      style: {
+        textAlign: 'right'
+      }
+    }, teamScoring === 'average' ? t.avg.toFixed(1) : t.total.toLocaleString())));
+  })));
+}
+
+// ─── MY POINTS PAGE ───────────────────────────────────────────────────────────
+function MyPointsPage() {
+  var _useApp8 = useApp(),
+    people = _useApp8.people,
+    tasks = _useApp8.tasks,
+    entries = _useApp8.entries,
+    currentUser = _useApp8.currentUser,
+    teams = _useApp8.teams,
+    fmtDate = _useApp8.fmtDate;
+  var myPerson = useMemo(function () {
+    return currentUser !== null && currentUser !== void 0 && currentUser.personId ? people.find(function (p) {
+      return p.id === currentUser.personId;
+    }) : null;
+  }, [people, currentUser]);
+  var myEntries = useMemo(function () {
+    return myPerson ? _toConsumableArray(entries).filter(function (e) {
+      return e.personId === myPerson.id;
+    }).sort(function (a, b) {
+      return new Date(b.date) - new Date(a.date);
+    }) : [];
+  }, [entries, myPerson]);
+  var total = useMemo(function () {
+    return myEntries.reduce(function (s, e) {
+      return s + e.points;
+    }, 0);
+  }, [myEntries]);
+  var taskName = function taskName(id) {
+    var _tasks$find4;
+    return ((_tasks$find4 = tasks.find(function (t) {
+      return t.id === id;
+    })) === null || _tasks$find4 === void 0 ? void 0 : _tasks$find4.name) || '?';
+  };
+  var taskCat = function taskCat(id) {
+    var _tasks$find5;
+    return ((_tasks$find5 = tasks.find(function (t) {
+      return t.id === id;
+    })) === null || _tasks$find5 === void 0 ? void 0 : _tasks$find5.category) || '—';
+  };
+  var teamName = function teamName(id) {
+    var _teams$find4;
+    return ((_teams$find4 = teams.find(function (t) {
+      return t.id === id;
+    })) === null || _teams$find4 === void 0 ? void 0 : _teams$find4.name) || '—';
+  };
+  var byTask = useMemo(function () {
+    var m = {};
+    myEntries.forEach(function (e) {
+      if (!m[e.taskId]) m[e.taskId] = {
+        name: taskName(e.taskId),
+        cat: taskCat(e.taskId),
+        pts: 0,
+        count: 0
+      };
+      m[e.taskId].pts += e.points;
+      m[e.taskId].count++;
+    });
+    return Object.values(m).sort(function (a, b) {
+      return b.pts - a.pts;
+    });
+  }, [myEntries]);
+  var thisMonth = useMemo(function () {
+    var n = new Date();
+    var start = new Date(n.getFullYear(), n.getMonth(), 1);
+    return myEntries.filter(function (e) {
+      return new Date(e.date) >= start;
+    }).reduce(function (s, e) {
+      return s + e.points;
+    }, 0);
+  }, [myEntries]);
+  if (!myPerson) return /*#__PURE__*/React.createElement("div", {
+    className: "fade-in"
+  }, /*#__PURE__*/React.createElement(PageHeader, {
+    title: "\uD83D\uDCCA MY STATS"
+  }), /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement("p", {
+    className: "table-cell-dim",
+    style: {
+      padding: '12px 0'
+    }
+  }, "Account not linked to a player record. Ask admin to link your account.")));
+  return /*#__PURE__*/React.createElement("div", {
+    className: "fade-in"
+  }, /*#__PURE__*/React.createElement(PageHeader, {
+    title: "\uD83D\uDCCA MY STATS",
+    subtitle: myPerson.firstName + ' ' + myPerson.lastName + ' · ' + teamName(myPerson.teamId)
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6"
+  }, [{
+    label: 'TOTAL XP',
+    value: total.toLocaleString(),
+    color: '#FF6600'
+  }, {
+    label: 'THIS MONTH',
+    value: thisMonth.toLocaleString(),
+    color: '#FFD700'
+  }, {
+    label: 'ENTRIES',
+    value: myEntries.length,
+    color: '#00FF88'
+  }].map(function (s) {
+    return /*#__PURE__*/React.createElement(Card, {
+      key: s.label,
+      className: "text-center"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "stat-num",
+      style: {
+        color: s.color
+      }
+    }, s.value), /*#__PURE__*/React.createElement("div", {
+      className: "pixel-label mt-2"
+    }, s.label));
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-1 lg:grid-cols-5 gap-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lg:col-span-3"
+  }, /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement("h2", {
+    className: "section-title mb-4"
+  }, "XP HISTORY"), myEntries.length === 0 ? /*#__PURE__*/React.createElement(Empty, {
+    msg: "NO XP YET"
+  }) : /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-0",
+    style: {
+      maxHeight: '380px',
+      overflowY: 'auto'
+    }
+  }, myEntries.map(function (e) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: e.id,
+      className: "history-row flex items-center gap-3 py-2"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "history-dot"
+    }), /*#__PURE__*/React.createElement("div", {
+      className: "flex-1 min-w-0"
+    }, /*#__PURE__*/React.createElement("p", {
+      className: "table-cell-name"
+    }, taskName(e.taskId)), e.notes && /*#__PURE__*/React.createElement("p", {
+      className: "table-cell-dim",
+      style: {
+        fontSize: '14px'
+      }
+    }, "\"", e.notes, "\"")), /*#__PURE__*/React.createElement("div", {
+      className: "text-right flex-shrink-0"
+    }, /*#__PURE__*/React.createElement("p", {
+      className: "xp-value"
+    }, "+", e.points), /*#__PURE__*/React.createElement("p", {
+      className: "table-cell-dim",
+      style: {
+        fontSize: '13px'
+      }
+    }, fmtDate(e.date))));
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: "lg:col-span-2"
+  }, /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement("h2", {
+    className: "section-title mb-4"
+  }, "BY QUEST"), byTask.length === 0 ? /*#__PURE__*/React.createElement(Empty, null) : /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-4"
+  }, byTask.map(function (t) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: t.name
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center justify-between mb-1"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "table-cell-name",
+      style: {
+        fontSize: '14px'
+      }
+    }, t.name), /*#__PURE__*/React.createElement("span", {
+      className: "xp-value ml-2",
+      style: {
+        fontSize: '16px'
+      }
+    }, t.pts)), /*#__PURE__*/React.createElement(XPBar, {
+      value: t.pts,
+      max: total
+    }), /*#__PURE__*/React.createElement("p", {
+      className: "table-cell-dim",
+      style: {
+        fontSize: '13px',
+        marginTop: '3px'
+      }
+    }, "x", t.count, " \xB7 ", t.cat));
+  }))))));
+}
+
+// ─── USERS PAGE ───────────────────────────────────────────────────────────────
+function UsersPage() {
+  var _useApp9 = useApp(),
+    users = _useApp9.users,
+    setUsers = _useApp9.setUsers,
+    people = _useApp9.people,
+    addAudit = _useApp9.addAudit,
+    uid = _useApp9.uid,
+    now = _useApp9.now;
+  var _useState71 = useState(null),
+    _useState72 = _slicedToArray(_useState71, 2),
+    modal = _useState72[0],
+    setModal = _useState72[1];
+  var _useState73 = useState({}),
+    _useState74 = _slicedToArray(_useState73, 2),
+    form = _useState74[0],
+    setForm = _useState74[1];
+  var saveFn = function saveFn() {
+    if (!form.name || !form.email || !form.role) {
+      alert('Name, email, and role are required.');
+      return;
+    }
+    if (modal === 'add' && !form.password) {
+      alert('Password is required for new users.');
+      return;
+    }
+    var dup = users.find(function (u) {
+      return u.email.toLowerCase() === form.email.toLowerCase() && u.id !== form.id;
+    });
+    if (dup) {
+      alert('Email must be unique.');
+      return;
+    }
+    if (modal === 'add') {
+      var u = _objectSpread(_objectSpread({}, form), {}, {
+        id: uid(),
+        createdAt: now()
+      });
+      setUsers([].concat(_toConsumableArray(users), [u]));
+      addAudit('CREATE', 'User', u.id, null, _objectSpread(_objectSpread({}, u), {}, {
+        password: '[hidden]'
+      }));
+    } else {
+      var old = users.find(function (u) {
+        return u.id === form.id;
+      });
+      var updated = _objectSpread({}, form);
+      if (!form.password) updated.password = old.password;
+      setUsers(users.map(function (u) {
+        return u.id === form.id ? updated : u;
+      }));
+      addAudit('UPDATE', 'User', form.id, _objectSpread(_objectSpread({}, old), {}, {
+        password: '[hidden]'
+      }), _objectSpread(_objectSpread({}, updated), {}, {
+        password: '[hidden]'
+      }));
+    }
+    setModal(null);
+  };
+  var roleColor = {
+    'Admin': 'badge-orange',
+    'Manager': 'badge-yellow',
+    'Employee': 'badge-green'
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "fade-in"
+  }, /*#__PURE__*/React.createElement(PageHeader, {
+    title: "\uD83D\uDD10 ACCOUNTS",
+    subtitle: "Manage login accounts and roles",
+    action: /*#__PURE__*/React.createElement(Btn, {
+      onClick: function onClick() {
+        setForm({
+          name: '',
+          email: '',
+          password: '',
+          role: 'Employee',
+          personId: ''
+        });
+        setModal('add');
+      }
+    }, "+ ADD ACCOUNT")
+  }), /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement("div", {
+    className: "overflow-x-auto"
+  }, /*#__PURE__*/React.createElement("table", {
+    className: "w-full"
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", {
+    className: "table-head"
+  }, /*#__PURE__*/React.createElement("th", {
+    className: "pb-3 pr-4 text-left"
+  }, "NAME"), /*#__PURE__*/React.createElement("th", {
+    className: "pb-3 pr-4 text-left"
+  }, "EMAIL"), /*#__PURE__*/React.createElement("th", {
+    className: "pb-3 pr-4 text-left"
+  }, "ROLE"), /*#__PURE__*/React.createElement("th", {
+    className: "pb-3 pr-4 text-left"
+  }, "LINKED PLAYER"), /*#__PURE__*/React.createElement("th", {
+    className: "pb-3 text-left"
+  }))), /*#__PURE__*/React.createElement("tbody", null, users.map(function (u) {
+    var p = u.personId ? people.find(function (x) {
+      return x.id === u.personId;
+    }) : null;
+    return /*#__PURE__*/React.createElement("tr", {
+      key: u.id,
+      className: "table-row"
+    }, /*#__PURE__*/React.createElement("td", {
+      className: "py-3 pr-4 table-cell-name"
+    }, u.name), /*#__PURE__*/React.createElement("td", {
+      className: "py-3 pr-4 table-cell-dim"
+    }, u.email), /*#__PURE__*/React.createElement("td", {
+      className: "py-3 pr-4"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: 'badge ' + (roleColor[u.role] || 'badge-gray')
+    }, u.role)), /*#__PURE__*/React.createElement("td", {
+      className: "py-3 pr-4 table-cell-dim"
+    }, p ? p.firstName + ' ' + p.lastName : 'NOT LINKED'), /*#__PURE__*/React.createElement("td", {
+      className: "py-3"
+    }, /*#__PURE__*/React.createElement(Btn, {
+      size: "sm",
+      variant: "secondary",
+      onClick: function onClick() {
+        setForm(_objectSpread(_objectSpread({}, u), {}, {
+          password: ''
+        }));
+        setModal('edit');
+      }
+    }, "EDIT")));
+  }))))), modal && /*#__PURE__*/React.createElement(Modal, {
+    title: modal === 'add' ? '>> ADD ACCOUNT' : '>> EDIT ACCOUNT',
+    onClose: function onClose() {
+      return setModal(null);
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-4"
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Full Name",
+    required: true
+  }, /*#__PURE__*/React.createElement("input", {
+    value: form.name || '',
+    onChange: function onChange(e) {
+      return setForm(_objectSpread(_objectSpread({}, form), {}, {
+        name: e.target.value
+      }));
+    },
+    autoFocus: true
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Email",
+    required: true
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "email",
+    value: form.email || '',
+    onChange: function onChange(e) {
+      return setForm(_objectSpread(_objectSpread({}, form), {}, {
+        email: e.target.value
+      }));
+    }
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: modal === 'edit' ? 'New Password (blank = keep)' : 'Password',
+    required: modal === 'add'
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "password",
+    value: form.password || '',
+    onChange: function onChange(e) {
+      return setForm(_objectSpread(_objectSpread({}, form), {}, {
+        password: e.target.value
+      }));
+    }
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Role",
+    required: true
+  }, /*#__PURE__*/React.createElement("select", {
+    value: form.role || 'Employee',
+    onChange: function onChange(e) {
+      return setForm(_objectSpread(_objectSpread({}, form), {}, {
+        role: e.target.value
+      }));
+    }
+  }, /*#__PURE__*/React.createElement("option", null, "Admin"), /*#__PURE__*/React.createElement("option", null, "Manager"), /*#__PURE__*/React.createElement("option", null, "Employee"))), /*#__PURE__*/React.createElement(Field, {
+    label: "Link to Player"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: form.personId || '',
+    onChange: function onChange(e) {
+      return setForm(_objectSpread(_objectSpread({}, form), {}, {
+        personId: e.target.value
+      }));
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "-- NOT LINKED --"), people.map(function (p) {
+    return /*#__PURE__*/React.createElement("option", {
+      key: p.id,
+      value: p.id
+    }, p.firstName, " ", p.lastName);
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: "flex justify-end gap-3 mt-6"
+  }, /*#__PURE__*/React.createElement(Btn, {
+    variant: "secondary",
+    onClick: function onClick() {
+      return setModal(null);
+    }
+  }, "CANCEL"), /*#__PURE__*/React.createElement(Btn, {
+    onClick: saveFn
+  }, "SAVE"))));
+}
+
+// ─── AUDIT LOG PAGE ───────────────────────────────────────────────────────────
+function AuditLogPage() {
+  var _useApp0 = useApp(),
+    audit = _useApp0.audit,
+    fmtDateTime = _useApp0.fmtDateTime;
+  var _useState75 = useState(''),
+    _useState76 = _slicedToArray(_useState75, 2),
+    filter = _useState76[0],
+    setFilter = _useState76[1];
+  var filtered = useMemo(function () {
+    return audit.filter(function (a) {
+      var s = filter.toLowerCase();
+      return !s || a.actor.toLowerCase().includes(s) || a.action.toLowerCase().includes(s) || a.entity.toLowerCase().includes(s);
+    });
+  }, [audit, filter]);
+  var actionBadge = {
+    'CREATE': 'badge-green',
+    'UPDATE': 'badge-yellow',
+    'DELETE': 'badge-red'
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "fade-in"
+  }, /*#__PURE__*/React.createElement(PageHeader, {
+    title: "\uD83D\uDD75\uFE0F AUDIT LOG",
+    subtitle: "System change history"
+  }), /*#__PURE__*/React.createElement(Card, {
+    className: "mb-4"
+  }, /*#__PURE__*/React.createElement("input", {
+    placeholder: "Filter by actor, action, entity...",
+    value: filter,
+    onChange: function onChange(e) {
+      return setFilter(e.target.value);
+    }
+  })), /*#__PURE__*/React.createElement(Card, null, filtered.length === 0 ? /*#__PURE__*/React.createElement(Empty, {
+    msg: "NO AUDIT RECORDS"
+  }) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxHeight: '600px',
+      overflowY: 'auto'
+    }
+  }, filtered.map(function (a) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: a.id,
+      className: "flex items-start gap-4 py-3 audit-row"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: 'badge ' + (actionBadge[a.action] || 'badge-gray')
+    }, a.action), /*#__PURE__*/React.createElement("div", {
+      className: "flex-1 min-w-0"
+    }, /*#__PURE__*/React.createElement("p", {
+      className: "table-cell-name",
+      style: {
+        fontSize: '14px'
+      }
+    }, /*#__PURE__*/React.createElement("span", null, a.actor), /*#__PURE__*/React.createElement("span", {
+      className: "table-cell-dim"
+    }, " ", a.action.toLowerCase(), "d "), /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: '#FF9933'
+      }
+    }, a.entity)), /*#__PURE__*/React.createElement("p", {
+      className: "table-cell-dim",
+      style: {
+        fontSize: '13px',
+        marginTop: '3px'
+      }
+    }, fmtDateTime(a.timestamp))));
+  }))));
+}
+
+// ─── MAIN APP ─────────────────────────────────────────────────────────────────
+function App() {
+  var _useState77 = useState('leaderboard'),
+    _useState78 = _slicedToArray(_useState77, 2),
+    page = _useState78[0],
+    setPage = _useState78[1];
+  var _useApp1 = useApp(),
+    currentUser = _useApp1.currentUser;
+  if (!currentUser) return /*#__PURE__*/React.createElement(LoginPage, null);
+  var role = currentUser.role;
+  var pageMap = {
+    leaderboard: /*#__PURE__*/React.createElement(LeaderboardPage, null),
+    award: role === 'Admin' || role === 'Manager' ? /*#__PURE__*/React.createElement(AwardPointsPage, null) : /*#__PURE__*/React.createElement(LeaderboardPage, null),
+    mypoints: /*#__PURE__*/React.createElement(MyPointsPage, null),
+    people: role === 'Admin' ? /*#__PURE__*/React.createElement(PeoplePage, null) : /*#__PURE__*/React.createElement(LeaderboardPage, null),
+    teams: role === 'Admin' ? /*#__PURE__*/React.createElement(TeamsPage, null) : /*#__PURE__*/React.createElement(LeaderboardPage, null),
+    tasks: role === 'Admin' ? /*#__PURE__*/React.createElement(TasksPage, null) : /*#__PURE__*/React.createElement(LeaderboardPage, null),
+    users: role === 'Admin' ? /*#__PURE__*/React.createElement(UsersPage, null) : /*#__PURE__*/React.createElement(LeaderboardPage, null),
+    audit: role === 'Admin' ? /*#__PURE__*/React.createElement(AuditLogPage, null) : /*#__PURE__*/React.createElement(LeaderboardPage, null)
+  };
+  return /*#__PURE__*/React.createElement(Layout, {
+    page: page,
+    setPage: setPage
+  }, pageMap[page] || /*#__PURE__*/React.createElement(LeaderboardPage, null));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(AppProvider, null, /*#__PURE__*/React.createElement(App, null)));
+
+</script></body></html>
