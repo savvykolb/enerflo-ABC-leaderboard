@@ -882,11 +882,6 @@ function AppProvider(_ref3) {
         users: data.users || [],
         audit: data.audit || []
       };
-      // Restore session
-      try {
-        var s = sessionStorage.getItem('lbs_session');
-        if (s) setCurrentUser(JSON.parse(s));
-      } catch (e) {}
       setAppState('ready');
     })["catch"](function (err) {
       setLoadError(err.message || 'Failed to connect to Google Sheets.');
@@ -903,12 +898,10 @@ function AppProvider(_ref3) {
       return x.email.toLowerCase() === email.toLowerCase() && x.password === password;
     });
     if (!u) return false;
-    sessionStorage.setItem('lbs_session', JSON.stringify(u));
     setCurrentUser(u);
     return true;
   };
   var logout = function logout() {
-    sessionStorage.removeItem('lbs_session');
     setCurrentUser(null);
   };
 
