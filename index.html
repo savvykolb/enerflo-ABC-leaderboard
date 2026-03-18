@@ -436,204 +436,19 @@ function _sheetsSave() {
   return _sheetsSave.apply(this, arguments);
 }
 function buildSeed() {
-  var m = function m(d) {
-    var dt = new Date();
-    dt.setDate(dt.getDate() - d);
-    return dt.toISOString().split('T')[0];
-  };
   return {
     users: [{
       id: 'u1',
-      email: 'admin@company.com',
-      password: 'admin123',
+      email: 'savannah.kolb@enerflo.io',
+      password: '4ab5423c68621e60',
       role: 'Admin',
-      name: 'Admin User',
+      name: 'Savannah Kolb',
       personId: ''
-    }, {
-      id: 'u2',
-      email: 'manager@company.com',
-      password: 'manager123',
-      role: 'Manager',
-      name: 'Sam Manager',
-      personId: 'p2'
-    }, {
-      id: 'u3',
-      email: 'emp@company.com',
-      password: 'emp123',
-      role: 'Employee',
-      name: 'Alex Employee',
-      personId: 'p1'
     }],
-    teams: [{
-      id: 't1',
-      name: 'Sales',
-      createdAt: now()
-    }, {
-      id: 't2',
-      name: 'Engineering',
-      createdAt: now()
-    }, {
-      id: 't3',
-      name: 'Marketing',
-      createdAt: now()
-    }],
-    people: [{
-      id: 'p1',
-      firstName: 'Alex',
-      lastName: 'Johnson',
-      email: 'alex@company.com',
-      teamId: 't1',
-      status: 'Active',
-      createdAt: now()
-    }, {
-      id: 'p2',
-      firstName: 'Sam',
-      lastName: 'Rivera',
-      email: 'sam@company.com',
-      teamId: 't1',
-      status: 'Active',
-      createdAt: now()
-    }, {
-      id: 'p3',
-      firstName: 'Jordan',
-      lastName: 'Lee',
-      email: 'jordan@company.com',
-      teamId: 't2',
-      status: 'Active',
-      createdAt: now()
-    }, {
-      id: 'p4',
-      firstName: 'Morgan',
-      lastName: 'Chen',
-      email: 'morgan@company.com',
-      teamId: 't2',
-      status: 'Active',
-      createdAt: now()
-    }, {
-      id: 'p5',
-      firstName: 'Taylor',
-      lastName: 'Smith',
-      email: 'taylor@company.com',
-      teamId: 't3',
-      status: 'Active',
-      createdAt: now()
-    }],
-    tasks: [{
-      id: 'tk1',
-      name: 'Closed Deal',
-      description: 'Successfully closed a sales deal',
-      pointValue: 100,
-      category: 'Sales',
-      active: true,
-      createdAt: now()
-    }, {
-      id: 'tk2',
-      name: 'Demo Completed',
-      description: 'Completed a product demo',
-      pointValue: 30,
-      category: 'Sales',
-      active: true,
-      createdAt: now()
-    }, {
-      id: 'tk3',
-      name: 'Bug Fixed',
-      description: 'Fixed a reported bug',
-      pointValue: 20,
-      category: 'Engineering',
-      active: true,
-      createdAt: now()
-    }, {
-      id: 'tk4',
-      name: 'Feature Shipped',
-      description: 'Shipped a new feature to production',
-      pointValue: 75,
-      category: 'Engineering',
-      active: true,
-      createdAt: now()
-    }, {
-      id: 'tk5',
-      name: 'Blog Post Published',
-      description: 'Published a marketing blog post',
-      pointValue: 40,
-      category: 'Marketing',
-      active: true,
-      createdAt: now()
-    }, {
-      id: 'tk6',
-      name: 'Training Completed',
-      description: 'Completed a training course',
-      pointValue: 15,
-      category: 'General',
-      active: true,
-      createdAt: now()
-    }],
-    entries: [{
-      id: 'e1',
-      personId: 'p1',
-      taskId: 'tk1',
-      points: 100,
-      date: m(2),
-      notes: 'Big enterprise deal',
-      proofUrl: '',
-      awardedByUserId: 'u1',
-      createdAt: now(),
-      updatedAt: now()
-    }, {
-      id: 'e2',
-      personId: 'p2',
-      taskId: 'tk2',
-      points: 30,
-      date: m(3),
-      notes: '',
-      proofUrl: '',
-      awardedByUserId: 'u1',
-      createdAt: now(),
-      updatedAt: now()
-    }, {
-      id: 'e3',
-      personId: 'p1',
-      taskId: 'tk6',
-      points: 15,
-      date: m(5),
-      notes: '',
-      proofUrl: '',
-      awardedByUserId: 'u2',
-      createdAt: now(),
-      updatedAt: now()
-    }, {
-      id: 'e4',
-      personId: 'p3',
-      taskId: 'tk4',
-      points: 75,
-      date: m(1),
-      notes: 'Auth module',
-      proofUrl: '',
-      awardedByUserId: 'u1',
-      createdAt: now(),
-      updatedAt: now()
-    }, {
-      id: 'e5',
-      personId: 'p4',
-      taskId: 'tk3',
-      points: 20,
-      date: m(4),
-      notes: '',
-      proofUrl: '',
-      awardedByUserId: 'u1',
-      createdAt: now(),
-      updatedAt: now()
-    }, {
-      id: 'e6',
-      personId: 'p5',
-      taskId: 'tk5',
-      points: 40,
-      date: m(2),
-      notes: 'Q1 recap post',
-      proofUrl: '',
-      awardedByUserId: 'u1',
-      createdAt: now(),
-      updatedAt: now()
-    }],
+    teams: [],
+    people: [],
+    tasks: [],
+    entries: [],
     audit: []
   };
 }
@@ -1100,11 +915,11 @@ var PageHeader = function PageHeader(_ref11) {
 function LoginPage() {
   var _useApp = useApp(),
     login = _useApp.login;
-  var _useState23 = useState('admin@company.com'),
+  var _useState23 = useState(''),
     _useState24 = _slicedToArray(_useState23, 2),
     email = _useState24[0],
     setEmail = _useState24[1];
-  var _useState25 = useState('admin123'),
+  var _useState25 = useState(''),
     _useState26 = _slicedToArray(_useState25, 2),
     pw = _useState26[0],
     setPw = _useState26[1];
@@ -1116,19 +931,6 @@ function LoginPage() {
     _useState30 = _slicedToArray(_useState29, 2),
     blink = _useState30[0],
     setBlink = _useState30[1];
-  var demo = [{
-    e: 'admin@company.com',
-    p: 'admin123',
-    role: 'ADMIN'
-  }, {
-    e: 'manager@company.com',
-    p: 'manager123',
-    role: 'MANAGER'
-  }, {
-    e: 'emp@company.com',
-    p: 'emp123',
-    role: 'PLAYER'
-  }];
   useEffect(function () {
     var t = setInterval(function () {
       return setBlink(function (x) {
@@ -1191,24 +993,7 @@ function LoginPage() {
     type: "submit",
     size: "lg",
     className: "w-full mt-2"
-  }, "\u25B6 INSERT COIN")), /*#__PURE__*/React.createElement(Divider, null), /*#__PURE__*/React.createElement("p", {
-    className: "pixel-label mb-3"
-  }, "SELECT PROFILE"), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col gap-2"
-  }, demo.map(function (d) {
-    return /*#__PURE__*/React.createElement("button", {
-      key: d.role,
-      onClick: function onClick() {
-        setEmail(d.e);
-        setPw(d.p);
-      },
-      className: "demo-btn text-left cursor-pointer"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "demo-role"
-    }, "[", d.role, "]"), /*#__PURE__*/React.createElement("span", {
-      className: "demo-email ml-2"
-    }, d.e));
-  }))), /*#__PURE__*/React.createElement("div", {
+  }, "\u25B6 INSERT COIN")), /*#__PURE__*/React.createElement("div", {
     className: "text-center mt-4 copyright"
   }, "\xA9 ENERFLO CORP. ALL RIGHTS RESERVED")));
 }
